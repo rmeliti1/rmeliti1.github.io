@@ -1,150 +1,215 @@
-/* === Basic Reset & Body (Keep as is) === */
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: sans-serif; line-height: 1.6; color: #333; background-color: #f4f4f4; padding: 20px; }
-header, footer { text-align: center; margin-bottom: 20px; padding: 10px; background-color: #e2e2e2; border-radius: 5px; }
-h1 { color: #0056b3; margin-bottom: 5px; }
-h3 { color: #0056b3; margin-bottom: 10px; border-bottom: 1px solid #ccc; padding-bottom: 5px; }
-h4 { margin-top: 15px; margin-bottom: 5px; color: #555; }
+document.addEventListener('DOMContentLoaded', async () => {
+    // --- Get DOM Elements ---
+    const searchInput = document.getElementById('search-input');
+    const clearSearchBtn = document.getElementById('clear-search-btn');
+    const filterControls = document.getElementById('filter-controls');
+    const knotGrid = document.getElementById('knot-grid');
+    const noResultsMessage = document.getElementById('no-results-message');
 
-/* === NEW: Controls Area Layout === */
-#controls-area {
-    background: #fff;
-    padding: 15px 20px;
-    margin-bottom: 30px;
-    border-radius: 5px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    display: flex;
-    flex-direction: column; /* Stack search above filters */
-    gap: 20px;
-}
+    // --- Check if elements exist ---
+    if (!searchInput || !clearSearchBtn || !filterControls || !knotGrid || !noResultsMessage) {
+        console.error("Initialization failed: One or more essential DOM elements not found.");
+        return; // Stop script execution if critical elements are missing
+    }
 
-/* === NEW: Search Controls Styling === */
-#search-controls {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-#search-controls label {
-    font-weight: bold;
-    color: #333;
-}
-#search-controls input[type="search"] {
-    padding: 8px 12px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    font-size: 1em;
-    flex-grow: 1; /* Allow search input to take available space */
-}
+    // --- State Variables ---
+    let currentSearchTerm = '';
+    let currentUseCaseFilter = 'all';
+    let currentCharacteristicFilter = 'all';
+    let allKnots = []; // To store the fetched knot data
 
-/* === Filter Controls Styling (Adjusted) === */
-#filter-controls {
-    display: flex;
-    flex-wrap: wrap; /* Allow filter groups to wrap */
-    gap: 20px; /* Gap between filter groups */
-    justify-content: center; /* Center groups if they wrap */
-    text-align: center; /* Center text within groups */
-}
-.filter-group {
-    margin-bottom: 10px;
-}
-.filter-group h2 {
-    margin-bottom: 10px;
-    font-size: 1.1em; /* Slightly smaller */
-    color: #444;
-}
-#filter-controls button {
-    padding: 6px 12px; /* Slightly smaller buttons */
-    margin: 3px 5px;
-    cursor: pointer;
-    border: 1px solid #ccc;
-    background-color: #f8f8f8;
-    border-radius: 4px;
-    transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
-    font-size: 0.9em;
-}
-#filter-controls button:hover {
-    background-color: #e9e9e9;
-    border-color: #bbb;
-}
-#filter-controls button.active {
-    background-color: #007bff;
-    color: white;
-    border-color: #0056b3;
-    font-weight: bold;
-}
+    // --- Debounce Utility ---
+    function debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+    }
 
-/* === Knot Grid & Cards (Keep animation/layout styles from previous step) === */
-#knot-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 20px;
-    transition: all 0.4s ease-in-out;
-}
-.knot-card {
-    background-color: #fff;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    padding: 15px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    margin-bottom: 0;
-    opacity: 1;
-    transform: scale(1);
-    visibility: visible;
-    height: auto;
-    border-width: 1px;
-    transition: opacity 0.4s ease-in-out, transform 0.4s ease-in-out, height 0.4s ease-in-out, padding-top 0.4s ease-in-out, padding-bottom 0.4s ease-in-out, margin-top 0.4s ease-in-out, margin-bottom 0.4s ease-in-out, border-width 0.4s ease-in-out, visibility 0s linear 0s;
-}
-.knot-card.hidden {
-   opacity: 0;
-   transform: scale(0.95);
-   pointer-events: none;
-   height: 0;
-   padding-top: 0;
-   padding-bottom: 0;
-   margin-top: 0;
-   margin-bottom: 0;
-   border-width: 0;
-   overflow: hidden;
-   visibility: hidden;
-   transition: opacity 0.4s ease-in-out, transform 0.4s ease-in-out, height 0.4s ease-in-out, padding-top 0.4s ease-in-out, padding-bottom 0.4s ease-in-out, margin-top 0.4s ease-in-out, margin-bottom 0.4s ease-in-out, border-width 0.4s ease-in-out, visibility 0s linear 0.4s;
-}
+    // --- Fetch Knot Data ---
+    async function loadKnotData() {
+        try {
+            const response = await fetch('knots.json');
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            allKnots = await response.json();
+            console.log(`Loaded ${allKnots.length} knots.`);
+        } catch (error) {
+            console.error("Could not load knot data:", error);
+            knotGrid.innerHTML = '<p style="color: red; text-align: center;">Error loading knot data. Please try again later.</p>';
+            // Disable controls if data loading fails
+            searchInput.disabled = true;
+            filterControls.querySelectorAll('button').forEach(btn => btn.disabled = true);
+        }
+    }
 
-/* === Knot Visual & Info (Keep iframe styles) === */
-.knot-visual { text-align: center; margin-bottom: 15px; background-color: #f0f0f0; padding: 10px; border-radius: 4px; }
-.knot-visual img, .knot-visual video, .knot-visual iframe { max-width: 100%; height: auto; display: block; margin: 5px auto; border: none; aspect-ratio: 16 / 9; /* Default aspect ratio */ }
-.knot-visual.wikimedia-video iframe { aspect-ratio: 512 / 288; } /* Specific ratio if needed */
-.knot-visual p.attribution { font-size: 0.7em; color: #666; margin-top: 5px; text-align: center; }
-.knot-info { flex-grow: 1; }
-.knot-info ul { list-style: disc; margin-left: 20px; margin-bottom: 10px; }
-.knot-info li { margin-bottom: 5px; }
-.knot-info p { margin-bottom: 10px; }
-
-/* === NEW: Knot Details List Styling === */
-.knot-details {
-    margin: 10px 0;
-    padding: 10px;
-    background-color: #f9f9f9;
-    border-left: 3px solid #007bff;
-    font-size: 0.9em;
-}
-.knot-details dt { /* Term (label) */
-    font-weight: bold;
-    color: #333;
-    display: inline; /* Keep on same line as dd */
-    margin-right: 5px;
-}
-.knot-details dd { /* Description (value) */
-    display: inline;
-    margin-left: 0; /* Reset default dl margin */
-    color: #555;
-    /* Allow wrapping */
-    display: block; /* Change to block if you want value on new line */
-    margin-bottom: 5px; /* Add space between detail items */
-}
+    // --- Render a Single Knot Card ---
+    function renderKnotCard(knot) {
+        // Handle visual content (iframe, image, multiple)
+        let visualHtml = '';
+        if (knot.visual) {
+            if (knot.visual.type === 'iframe') {
+                visualHtml = `<iframe src="${knot.visual.src}" title="${knot.visual.title || knot.name}" frameborder="0" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>`;
+            } else if (knot.visual.type === 'image') {
+                visualHtml = `<img src="${knot.visual.src}" alt="${knot.visual.alt || knot.name}" loading="lazy">`;
+            } else if (knot.visual.type === 'multiple' && Array.isArray(knot.visual.items)) {
+                 visualHtml = knot.visual.items.map(item => {
+                    let itemHtml = '';
+                    if (item.type === 'iframe') {
+                         itemHtml = `<iframe src="${item.src}" title="${item.title || knot.name}" frameborder="0" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>`;
+                    } else if (item.type === 'image') {
+                        itemHtml = `<img src="${item.src}" alt="${item.alt || knot.name}" loading="lazy">`;
+                    }
+                    if(item.attribution) {
+                        itemHtml += `<p class="attribution">${item.attribution}</p>`;
+                    }
+                    return itemHtml;
+                 }).join('');
+            }
+             // Add overall attribution if present and not handled per-item in 'multiple'
+            if (knot.visual.attribution && knot.visual.type !== 'multiple') {
+                let attributionContent = knot.visual.attribution;
+                 if (knot.visual.attributionLink) {
+                    attributionContent = `<a href="${knot.visual.attributionLink}" target="_blank" rel="noopener noreferrer">${knot.visual.attribution}</a>`;
+                 }
+                visualHtml += `<p class="attribution">${attributionContent}</p>`;
+            }
+        }
 
 
-/* === Footer (Keep as is) === */
-footer { margin-top: 30px; font-size: 0.9em; color: #666; }
+        // Handle details - build dl list
+        let detailsHtml = '';
+        if (knot.details) {
+            detailsHtml = Object.entries(knot.details).map(([key, value]) => {
+                // Simple way to format key to Title Case
+                const formattedKey = key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
+                return `<dt>${formattedKey}:</dt><dd>${value || 'N/A'}</dd>`;
+            }).join('');
+        }
+
+        return `
+            <div class="knot-card" data-id="${knot.id}" data-usecase="${knot.usecases.join(' ')}" data-characteristics="${knot.characteristics.join(' ')}">
+                <h3>${knot.name}</h3>
+                <div class="knot-visual">
+                    ${visualHtml || '<p>No visual available.</p>'}
+                </div>
+                <div class="knot-info">
+                    <h4>Description:</h4>
+                    <p>${knot.description || 'No description available.'}</p>
+
+                    ${detailsHtml ? `<dl class="knot-details">${detailsHtml}</dl>` : ''}
+
+                    ${knot.pros && knot.pros.length > 0 ? `<h4>Pros:</h4><ul>${knot.pros.map(pro => `<li>${pro}</li>`).join('')}</ul>` : ''}
+                    ${knot.cons && knot.cons.length > 0 ? `<h4>Cons:</h4><ul>${knot.cons.map(con => `<li>${con}</li>`).join('')}</ul>` : ''}
+
+                    ${knot.applications ? `<h4>Typical Applications:</h4><p>${knot.applications}</p>` : ''}
+                </div>
+            </div>
+        `;
+    }
+
+    // --- Display Filtered Knots ---
+    function displayKnots(knotsToDisplay) {
+        if (knotsToDisplay.length === 0) {
+            knotGrid.innerHTML = ''; // Clear grid
+            noResultsMessage.classList.remove('hidden');
+        } else {
+            // Build HTML string for all cards at once for better performance
+            knotGrid.innerHTML = knotsToDisplay.map(renderKnotCard).join('');
+            noResultsMessage.classList.add('hidden');
+        }
+    }
+
+    // --- Main Filtering Function ---
+    function filterAndSearchKnots() {
+        const searchTerm = currentSearchTerm.toLowerCase().trim();
+
+        const filteredKnots = allKnots.filter(knot => {
+            // --- Check Criteria ---
+            // 1. Search Match (Name, Description, Pros, Cons, Applications, Characteristics, Usecases)
+            const searchableText = [
+                knot.name,
+                knot.description,
+                knot.applications,
+                ...(knot.pros || []),
+                ...(knot.cons || []),
+                ...(knot.usecases || []),
+                ...(knot.characteristics || [])
+            ].join(' ').toLowerCase();
+            const searchMatch = searchTerm === '' || searchableText.includes(searchTerm);
+
+            // 2. Use Case Match
+            const useCaseMatch = currentUseCaseFilter === 'all' || knot.usecases.includes(currentUseCaseFilter);
+
+            // 3. Characteristic Match
+            const characteristicMatch = currentCharacteristicFilter === 'all' || knot.characteristics.includes(currentCharacteristicFilter);
+
+            // --- Determine Visibility ---
+            return searchMatch && useCaseMatch && characteristicMatch;
+        });
+
+        displayKnots(filteredKnots);
+    }
+
+    // Debounced version of the filter function for search input
+    const debouncedFilter = debounce(filterAndSearchKnots, 300);
+
+    // --- Event Listener for Search Input ---
+    searchInput.addEventListener('input', (event) => {
+        currentSearchTerm = event.target.value;
+        debouncedFilter(); // Use the debounced version
+    });
+
+    // --- Event Listener for Clear Search Button ---
+    clearSearchBtn.addEventListener('click', () => {
+        searchInput.value = '';
+        currentSearchTerm = '';
+        filterAndSearchKnots(); // Filter immediately
+    });
+
+    // --- Event Listener for Filter Buttons ---
+    filterControls.addEventListener('click', (event) => {
+        // Only run if a BUTTON within a .filter-group was clicked
+        const button = event.target.closest('.filter-group button');
+        if (!button) {
+            return;
+        }
+
+        const filterGroup = button.getAttribute('data-filter-group');
+        const filterValue = button.getAttribute('data-filter');
+
+        // --- Update State Variables ---
+        if (filterGroup === 'usecase') {
+            currentUseCaseFilter = filterValue;
+        } else if (filterGroup === 'characteristic') {
+            currentCharacteristicFilter = filterValue;
+        } else {
+            return; // Should not happen
+        }
+
+        // --- Update Active Button Styling within the clicked group ---
+        const groupButtons = button.closest('.filter-group').querySelectorAll('button');
+        groupButtons.forEach(btn => {
+            btn.classList.remove('active');
+        });
+        button.classList.add('active');
+
+        // --- Trigger Filtering ---
+        filterAndSearchKnots();
+    });
+
+    // --- Initial Setup ---
+    await loadKnotData(); // Load data first
+    if (allKnots.length > 0) {
+        displayKnots(allKnots); // Display all knots initially if data loaded
+        // Ensure default 'all' buttons are visually active (redundant if class is set in HTML, but safe)
+        filterControls.querySelector('button[data-filter-group="usecase"][data-filter="all"]').classList.add('active');
+        filterControls.querySelector('button[data-filter-group="characteristic"][data-filter="all"]').classList.add('active');
+    }
+});

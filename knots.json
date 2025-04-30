@@ -1,0 +1,370 @@
+[
+  {
+    "id": "bowline",
+    "name": "Bowline (Palstek)",
+    "usecases": ["loop"],
+    "characteristics": ["secure", "easy-untie", "fixed-loop", "essential"],
+    "visual": {
+      "type": "iframe",
+      "src": "https://commons.wikimedia.org/wiki/File:Palstek.webm?embedplayer=yes",
+      "attribution": "Video by PhilEOS, CC BY-SA 3.0, via Wikimedia Commons",
+      "attributionLink": "https://creativecommons.org/licenses/by-sa/3.0",
+      "aspectRatio": "512 / 288"
+    },
+    "description": "Creates a reliable fixed loop at the end of a rope. Known as the 'King of Knots'.",
+    "details": {
+      "strengthImpact": "Significant reduction (~40-50%).",
+      "easeOfUntying": "Relatively easy, even after heavy load.",
+      "securityNote": "Can shake loose if unloaded; consider backup/stopper knot for critical applications."
+    },
+    "pros": [
+      "Strong and secure loop (when loaded).",
+      "Doesn't slip or bind easily."
+    ],
+    "cons": [
+       "Can potentially shake loose if not under load.",
+       "Cannot be tied/untied when weighted.",
+       "Lower breaking strength compared to Figure Eight loop."
+    ],
+    "applications": "Rescue, mooring boats, attaching rope to objects, general utility loop."
+  },
+  {
+    "id": "square-knot",
+    "name": "Square Knot (Reef Knot)",
+    "usecases": ["joining", "binding"],
+    "characteristics": ["simple", "quick", "flat", "non-critical", "jams"],
+    "visual": {
+      "type": "iframe",
+      "src": "https://www.youtube.com/embed/LOAxiQk8wj8?si=wJEwXPBL_Y58ZIpV",
+      "title": "YouTube video player",
+      "attribution": "Via YouTube"
+    },
+    "description": "A simple knot for joining two ropes of *equal* thickness or for binding.",
+    "details": {
+      "strengthImpact": "Significant reduction (~50-60%). Unreliable.",
+      "easeOfUntying": "Can jam badly after moderate loading.",
+      "securityNote": "**Unsafe for critical loads.** Prone to capsizing or slipping, especially with synthetic ropes."
+    },
+    "pros": [
+      "Very simple and quick to tie.",
+      "Lies relatively flat."
+    ],
+    "cons": [
+      "Unreliable and unsafe for critical loads.",
+      "Can capsize or slip easily.",
+      "Jams tightly."
+    ],
+    "applications": "Tying bandages, securing parcels (non-critical), reefing sails (its namesake). **Avoid for safety applications.**"
+  },
+  {
+    "id": "clove-hitch",
+    "name": "Clove Hitch",
+    "usecases": ["hitch"],
+    "characteristics": ["adjustable", "quick", "temporary", "mid-rope"],
+    "visual": {
+      "type": "iframe",
+      "src": "https://www.youtube.com/embed/EKRFawQCP0Y?si=mZj2BcppVPe9zkOm",
+      "title": "YouTube video player",
+      "attribution": "Via YouTube"
+    },
+    "description": "Fastens a rope to a post, rail, or carabiner.",
+    "details": {
+      "strengthImpact": "Moderate reduction (~30-40%).",
+      "easeOfUntying": "Can bind, moderately difficult after heavy load.",
+      "securityNote": "Can slip under cyclical loads or vibrations; often requires backup (e.g., half-hitch)."
+    },
+    "pros": [
+      "Quick and easy to tie, even one-handed.",
+      "Adjustable.",
+      "Can be tied mid-rope or at the end."
+    ],
+    "cons": [
+      "Can slip, especially on smooth surfaces or with vibrations.",
+      "Can bind."
+    ],
+    "applications": "Temporary moorings, starting lashings, tent guylines (with backup), attaching to carabiners (climbing anchors - adjustable)."
+  },
+  {
+    "id": "figure-eight",
+    "name": "Figure-Eight Knot / Follow-Through",
+    "usecases": ["stopper", "loop"],
+    "characteristics": ["secure", "easy-inspect", "reliable", "essential"],
+    "visual": {
+       "type": "multiple",
+       "items": [
+         { "type": "iframe", "src": "https://www.youtube.com/embed/GFlwrvggas0?si=ZtK0zfx0k8tP_hoO&start=4", "title": "YouTube video player", "attribution": "(Figure-Eight Follow-Through for loop)" },
+         { "type": "iframe", "src": "https://www.youtube.com/embed/Jehd_61AsN0?si=PG6FtpwIpLWdb0PE", "title": "YouTube video player", "attribution": "(Simple Figure-Eight for stopper)" }
+       ]
+    },
+    "description": "Fundamental knot used as a stopper or tied back on itself (follow-through) for a strong loop.",
+    "details": {
+      "strengthImpact": "Low reduction (Loop: ~20-25%). Strongest common end loop.",
+      "easeOfUntying": "Moderately difficult after very heavy load, but better than Overhand.",
+      "securityNote": "Very secure and reliable loop. Easy to visually inspect for correctness."
+    },
+    "pros": [
+      "Very strong and secure loop.",
+      "Relatively easy to inspect.",
+      "Good stopper knot (less prone to jamming than Overhand)."
+    ],
+    "cons": [
+      "Bulkier than some alternatives (Bowline, Overhand).",
+      "Can be harder to untie after extreme loading than a Bowline."
+    ],
+    "applications": "<b>Stopper:</b> Preventing rope end passing through device. <br><b>Loop:</b> Standard for climbing harnesses, rescue, critical load attachment."
+  },
+  {
+    "id": "sheet-bend",
+    "name": "Sheet Bend",
+    "usecases": ["joining"],
+    "characteristics": ["different-ropes", "relatively-secure", "quick", "simple"],
+    "visual": {
+      "type": "iframe",
+      "src": "https://www.youtube.com/embed/uYTbmt5_tfI?si=BCh-ZhaF6J45zfjO",
+      "title": "YouTube video player",
+      "attribution": "Via YouTube"
+    },
+    "description": "Joins two ropes, especially of unequal thickness. Working ends must be on the *same* side.",
+    "details": {
+      "strengthImpact": "Moderate reduction (~40-50%).",
+      "easeOfUntying": "Moderate difficulty.",
+      "securityNote": "Less secure than Figure Eight Bend or Double Fisherman's. Can work loose if not under tension. Double Sheet Bend is more secure."
+    },
+    "pros": [
+      "Effective for joining ropes of different diameters/materials.",
+      "Relatively simple and quick."
+    ],
+    "cons": [
+      "Not for critical loads.",
+      "Can slip if not kept taut.",
+      "Less secure than other bends."
+    ],
+    "applications": "Joining flags to halyards, extending ropes temporarily, net making, general utility (non-critical)."
+  },
+  {
+    "id": "taut-line-hitch",
+    "name": "Taut-Line Hitch",
+    "usecases": ["hitch", "loop"],
+    "characteristics": ["adjustable", "friction"],
+    "visual": {
+      "type": "iframe",
+      "src": "https://www.youtube.com/embed/69wcDwD6gNU?si=J9btkeYJef2KcHdy",
+      "title": "YouTube video player",
+      "attribution": "Via YouTube"
+    },
+    "description": "Creates an adjustable loop or attaches to an object, allowing the line to be tightened. (Midshipman's Hitch often preferred).",
+    "details": {
+      "strengthImpact": "Moderate reduction (depends on friction).",
+      "easeOfUntying": "Generally easy.",
+      "securityNote": "Can slip on very slick ropes or if not dressed properly. Test under load."
+    },
+    "pros": [
+      "Adjustable under tension.",
+      "Grips well when loaded (usually)."
+    ],
+    "cons": [
+      "Can slip if tied incorrectly or with very slick ropes.",
+      "Less secure than fixed loops for critical loads."
+    ],
+    "applications": "Tent guylines, clotheslines, securing tarps, adjustable load securing (non-critical)."
+  },
+  {
+    "id": "two-half-hitches",
+    "name": "Two Half-Hitches",
+    "usecases": ["hitch"],
+    "characteristics": ["simple", "quick", "temporary", "non-critical"],
+    "visual": {
+      "type": "iframe",
+      "src": "https://www.youtube.com/embed/2Ssa22v4fxE?si=_tnsd37JG8a13HEZ&start=4",
+      "title": "YouTube video player",
+      "attribution": "Via YouTube"
+    },
+    "description": "Very simple hitch for temporarily securing a rope to a post or ring.",
+    "details": {
+      "strengthImpact": "Significant reduction (~50%+). Unreliable.",
+      "easeOfUntying": "Can jam, moderate difficulty.",
+      "securityNote": "Not secure for important loads. Can slip easily. Often needs additional hitches or backup."
+    },
+    "pros": [
+      "Extremely easy and quick to tie.",
+      "Easy to remember."
+    ],
+    "cons": [
+      "Not very secure; slips easily.",
+      "Can bind.",
+      "Unsuitable for critical applications."
+    ],
+    "applications": "Temporary fastening of light loads, brief mooring (very light boat), clotheslines (may slip)."
+  },
+  {
+    "id": "overhand-knot",
+    "name": "Overhand Knot",
+    "usecases": ["stopper"],
+    "characteristics": ["simple", "base-knot", "jams"],
+    "visual": {
+      "type": "iframe",
+      "src": "https://www.youtube.com/embed/0-eDYx3lkC8?si=8gEZuyWjrN2Ht4Ld&start=4",
+      "title": "YouTube video player",
+      "attribution": "Via YouTube"
+    },
+    "description": "The simplest knot, basis for many others. Used primarily as a basic stopper.",
+    "details": {
+      "strengthImpact": "Significant reduction (~50%+).",
+      "easeOfUntying": "Jams very badly after loading; often impossible to untie.",
+      "securityNote": "Weakest stopper knot. Can roll off the end under load. Avoid for critical uses."
+    },
+    "pros": [
+      "Extremely simple and fast.",
+      "Small and compact.",
+      "Foundation for other knots."
+    ],
+    "cons": [
+      "Jams very tightly.",
+      "Weakens the rope significantly.",
+      "Can roll/fail under load."
+    ],
+    "applications": "Simple non-critical stopper, temporary knot, base for other knots (e.g., Water Knot, Fisherman's Knot)."
+  },
+  {
+    "id": "alpine-butterfly",
+    "name": "Alpine Butterfly Loop",
+    "usecases": ["loop"],
+    "characteristics": ["secure", "mid-rope", "easy-untie", "stable"],
+    "visual": {
+      "type": "iframe",
+      "src": "https://www.youtube.com/embed/Va7TEz_flHg?si=rPz7HwttI5fmO9AX&start=4",
+      "title": "YouTube video player",
+      "attribution": "Via YouTube"
+    },
+    "description": "Forms a secure, stable loop in the middle of a rope.",
+    "details": {
+      "strengthImpact": "Moderate reduction (~35-45%).",
+      "easeOfUntying": "Relatively easy, even after loading.",
+      "securityNote": "Very reliable when tied correctly. Loadable in 3 directions."
+    },
+    "pros": [
+      "Strong and stable loop, loadable in three directions.",
+      "Easy to untie after loading.",
+      "Can be tied in the bight (mid-rope)."
+    ],
+    "cons": [
+      "Slightly more complex to learn than Bowline/Figure Eight.",
+      "Can be visually confusing to inspect if unfamiliar."
+    ],
+    "applications": "Climbing (isolating rope damage, mid-rope anchors, glacier travel), rescue, creating fixed loops along a line."
+  },
+  {
+    "id": "double-fishermans",
+    "name": "Double Fisherman's Bend",
+    "usecases": ["joining"],
+    "characteristics": ["secure", "permanent", "reliable", "jams"],
+    "visual": {
+      "type": "iframe",
+      "src": "https://www.youtube.com/embed/9glfeKvEuyo?si=4DgkTu-VAAZ_MJRh&start=4",
+      "title": "YouTube video player",
+      "attribution": "Via YouTube"
+    },
+    "description": "Very strong and secure method for joining two ropes, especially similar-diameter synthetic ropes.",
+    "details": {
+      "strengthImpact": "Low reduction (~20-30%). One of the strongest bends.",
+      "easeOfUntying": "Extremely difficult/impossible after loading (considered permanent).",
+      "securityNote": "Very reliable for critical joins. Ensure sufficient tail length."
+    },
+    "pros": [
+      "Extremely secure and reliable bend.",
+      "Relatively compact.",
+      "Standard for joining climbing ropes."
+    ],
+    "cons": [
+      "Considered permanent after heavy loading.",
+      "Can be difficult to tie correctly; requires careful dressing."
+    ],
+    "applications": "Joining climbing ropes (rappelling), making cordelettes/prusik loops, critical/permanent rope joining."
+  },
+  {
+    "id": "prusik-knot",
+    "name": "Prusik Knot",
+    "usecases": ["hitch"],
+    "characteristics": ["friction", "ascending", "bidirectional", "adjustable"],
+    "visual": {
+      "type": "iframe",
+      "src": "https://www.youtube.com/embed/EFHxQ5fiUvI?si=Th79LM3DfWPZsme2&start=4",
+      "title": "YouTube video player",
+      "attribution": "Via YouTube"
+    },
+    "description": "A friction hitch tied with a loop of cord around a thicker rope. Grips when loaded, slides when unloaded.",
+    "details": {
+      "strengthImpact": "Does not weaken the main rope; relies on strength of cord loop.",
+      "easeOfUntying": "Usually easy, can jam slightly after very heavy load.",
+      "securityNote": "Requires correct cord diameter ratio (typically ~60-80% of main rope). Can slip on wet/icy ropes. Test function before critical use."
+    },
+    "pros": [
+      "Grips well in both directions along the main rope.",
+      "Can be slid along the rope when not weighted.",
+      "Relatively simple concept."
+    ],
+    "cons": [
+      "Requires a pre-tied loop of appropriate cord.",
+      "Can jam after heavy load cycles.",
+      "May slip on wet/icy ropes. Other friction hitches may perform better."
+    ],
+    "applications": "Climbing (ascending ropes, progress capture, rappel backup - use caution), rescue, arborist work."
+  },
+  {
+    "id": "truckers-hitch",
+    "name": "Trucker's Hitch",
+    "usecases": ["hitch", "binding"],
+    "characteristics": ["mechanical-advantage", "adjustable", "complex"],
+    "visual": {
+      "type": "iframe",
+      "src": "https://www.youtube.com/embed/W86XNUmElP4?si=1ojqUttZJfT_4Cup&start=4",
+      "title": "YouTube video player",
+      "attribution": "Via YouTube"
+    },
+    "description": "Compound knot system providing mechanical advantage (typically 3:1) to tighten a line securely.",
+    "details": {
+      "strengthImpact": "Variable; limited by the strength of the loop knot used and friction point.",
+      "easeOfUntying": "Relatively easy to release tension; loop knot might jam.",
+      "securityNote": "Reliability depends heavily on the loop knot used (e.g., avoid Slippery Half Hitch for loop). Rope can wear at friction point."
+    },
+    "pros": [
+      "Provides significant tightening power (mechanical advantage).",
+      "Relatively easy to release tension.",
+      "Versatile for securing loads."
+    ],
+    "cons": [
+      "More complex than simple hitches.",
+      "Strength/reliability depends on loop choice.",
+      "Can cause high friction and rope wear."
+    ],
+    "applications": "Securing loads on trucks/trailers/racks, creating high-tension ridgelines, clotheslines, general load securing."
+  },
+  {
+    "id": "rolling-hitch",
+    "name": "Rolling Hitch",
+    "usecases": ["hitch"],
+    "characteristics": ["secure", "adjustable", "friction", "one-direction"],
+    "visual": {
+      "type": "image",
+      "src": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/17/Rolling_hitch_animated_alternative.gif/220px-Rolling_hitch_animated_alternative.gif",
+      "alt": "Rolling Hitch Animation",
+      "attribution": "Via Wikimedia Commons"
+    },
+    "description": "A friction hitch used to attach a rope to another rope, pole, or cable, especially for pulling along the object.",
+    "details": {
+      "strengthImpact": "Moderate reduction.",
+      "easeOfUntying": "Generally easy.",
+      "securityNote": "Grips securely when pulled in line with the standing part (direction of the turns). May slip if pulled sideways or on very slick surfaces."
+    },
+    "pros": [
+      "Grips well when pulled in one direction along the object.",
+      "Can be slid along the object when slack.",
+      "Relatively easy to tie."
+    ],
+    "cons": [
+      "Less secure if the pull is not aligned correctly.",
+      "May slip on very smooth or tapered objects."
+    ],
+    "applications": "Creating adjustable snubbers on mooring lines, attaching a rope to a taut line (e.g., anchor rode), hauling along a fixed line, backup for other hitches."
+  }
+]

@@ -1,98 +1,150 @@
-/* --- Existing CSS --- */
-/* (Keep your other styles: body, header, nav, .knot-visual, etc.) */
+/* === Basic Reset & Body (Keep as is) === */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: sans-serif; line-height: 1.6; color: #333; background-color: #f4f4f4; padding: 20px; }
+header, footer { text-align: center; margin-bottom: 20px; padding: 10px; background-color: #e2e2e2; border-radius: 5px; }
+h1 { color: #0056b3; margin-bottom: 5px; }
+h3 { color: #0056b3; margin-bottom: 10px; border-bottom: 1px solid #ccc; padding-bottom: 5px; }
+h4 { margin-top: 15px; margin-bottom: 5px; color: #555; }
 
-/* Knot Grid Layout */
+/* === NEW: Controls Area Layout === */
+#controls-area {
+    background: #fff;
+    padding: 15px 20px;
+    margin-bottom: 30px;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    display: flex;
+    flex-direction: column; /* Stack search above filters */
+    gap: 20px;
+}
+
+/* === NEW: Search Controls Styling === */
+#search-controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+#search-controls label {
+    font-weight: bold;
+    color: #333;
+}
+#search-controls input[type="search"] {
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 1em;
+    flex-grow: 1; /* Allow search input to take available space */
+}
+
+/* === Filter Controls Styling (Adjusted) === */
+#filter-controls {
+    display: flex;
+    flex-wrap: wrap; /* Allow filter groups to wrap */
+    gap: 20px; /* Gap between filter groups */
+    justify-content: center; /* Center groups if they wrap */
+    text-align: center; /* Center text within groups */
+}
+.filter-group {
+    margin-bottom: 10px;
+}
+.filter-group h2 {
+    margin-bottom: 10px;
+    font-size: 1.1em; /* Slightly smaller */
+    color: #444;
+}
+#filter-controls button {
+    padding: 6px 12px; /* Slightly smaller buttons */
+    margin: 3px 5px;
+    cursor: pointer;
+    border: 1px solid #ccc;
+    background-color: #f8f8f8;
+    border-radius: 4px;
+    transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+    font-size: 0.9em;
+}
+#filter-controls button:hover {
+    background-color: #e9e9e9;
+    border-color: #bbb;
+}
+#filter-controls button.active {
+    background-color: #007bff;
+    color: white;
+    border-color: #0056b3;
+    font-weight: bold;
+}
+
+/* === Knot Grid & Cards (Keep animation/layout styles from previous step) === */
 #knot-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     gap: 20px;
-    /* Add transition for smoother reflow when children change */
-    transition: all 0.4s ease-in-out; /* Optional: helps grid animate changes */
+    transition: all 0.4s ease-in-out;
 }
-
-/* Individual Knot Cards - Update Transitions */
 .knot-card {
     background-color: #fff;
-    border: 1px solid #ddd; /* Ensure border is defined */
+    border: 1px solid #ddd;
     border-radius: 5px;
-    padding: 15px;         /* Ensure padding is defined */
+    padding: 15px;
     box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     display: flex;
     flex-direction: column;
-    overflow: hidden;      /* Important: Prevents content spill during collapse */
-    margin-bottom: 0; /* Let grid gap handle vertical spacing if needed */
-
-    /* === Animation Properties (Normal State) === */
+    overflow: hidden;
+    margin-bottom: 0;
     opacity: 1;
     transform: scale(1);
     visibility: visible;
-    height: auto; /* Or an estimated height if needed, but auto is preferred */
-    border-width: 1px; /* Explicit border width */
-
-    /* === UPDATED Transition Definition === */
-    /* Transition ALL properties that will change in the .hidden state */
-    transition: opacity 0.4s ease-in-out,
-                transform 0.4s ease-in-out,
-                height 0.4s ease-in-out,      /* Animate height */
-                padding-top 0.4s ease-in-out, /* Animate padding */
-                padding-bottom 0.4s ease-in-out,
-                margin-top 0.4s ease-in-out,  /* Animate margins */
-                margin-bottom 0.4s ease-in-out,
-                border-width 0.4s ease-in-out, /* Animate border width */
-                visibility 0s linear 0s;     /* Show immediately */
+    height: auto;
+    border-width: 1px;
+    transition: opacity 0.4s ease-in-out, transform 0.4s ease-in-out, height 0.4s ease-in-out, padding-top 0.4s ease-in-out, padding-bottom 0.4s ease-in-out, margin-top 0.4s ease-in-out, margin-bottom 0.4s ease-in-out, border-width 0.4s ease-in-out, visibility 0s linear 0s;
 }
-
-
-/* Class to hide knots during filtering - UPDATE Properties and Transition */
 .knot-card.hidden {
-   /* Make invisible */
    opacity: 0;
-   transform: scale(0.95); /* Optional: slight scale down */
+   transform: scale(0.95);
    pointer-events: none;
-
-   /* === Collapse the element's space === */
-   height: 0;           /* Collapse height */
-   padding-top: 0;      /* Collapse padding */
+   height: 0;
+   padding-top: 0;
    padding-bottom: 0;
-   margin-top: 0;       /* Collapse margin */
+   margin-top: 0;
    margin-bottom: 0;
-   border-width: 0;     /* Collapse border */
-   overflow: hidden;      /* Ensure content is clipped */
-
-   /* Remove from layout flow *after* transition */
+   border-width: 0;
+   overflow: hidden;
    visibility: hidden;
-
-   /* === UPDATED Transition for .hidden state === */
-   /* Apply same duration to layout properties as opacity/transform */
-   /* Keep visibility delayed to match animation duration */
-   transition: opacity 0.4s ease-in-out,
-               transform 0.4s ease-in-out,
-               height 0.4s ease-in-out,
-               padding-top 0.4s ease-in-out,
-               padding-bottom 0.4s ease-in-out,
-               margin-top 0.4s ease-in-out,
-               margin-bottom 0.4s ease-in-out,
-               border-width 0.4s ease-in-out,
-               visibility 0s linear 0.4s; /* Delay visibility change */
+   transition: opacity 0.4s ease-in-out, transform 0.4s ease-in-out, height 0.4s ease-in-out, padding-top 0.4s ease-in-out, padding-bottom 0.4s ease-in-out, margin-top 0.4s ease-in-out, margin-bottom 0.4s ease-in-out, border-width 0.4s ease-in-out, visibility 0s linear 0.4s;
 }
 
-/* ... (Rest of your CSS, e.g., .knot-visual, footer, etc.) ... */
+/* === Knot Visual & Info (Keep iframe styles) === */
+.knot-visual { text-align: center; margin-bottom: 15px; background-color: #f0f0f0; padding: 10px; border-radius: 4px; }
+.knot-visual img, .knot-visual video, .knot-visual iframe { max-width: 100%; height: auto; display: block; margin: 5px auto; border: none; aspect-ratio: 16 / 9; /* Default aspect ratio */ }
+.knot-visual.wikimedia-video iframe { aspect-ratio: 512 / 288; } /* Specific ratio if needed */
+.knot-visual p.attribution { font-size: 0.7em; color: #666; margin-top: 5px; text-align: center; }
+.knot-info { flex-grow: 1; }
+.knot-info ul { list-style: disc; margin-left: 20px; margin-bottom: 10px; }
+.knot-info li { margin-bottom: 5px; }
+.knot-info p { margin-bottom: 10px; }
 
-/* Ensure iframe styling is still correct */
-.knot-visual img,
-.knot-visual video, 
-.knot-visual iframe { 
-    max-width: 100%;  
-    height: auto;     
-    display: block;   
-    margin: 5px auto; 
-    border: none; 
-    aspect-ratio: 16 / 9; /* Or adjust per video if needed */
+/* === NEW: Knot Details List Styling === */
+.knot-details {
+    margin: 10px 0;
+    padding: 10px;
+    background-color: #f9f9f9;
+    border-left: 3px solid #007bff;
+    font-size: 0.9em;
+}
+.knot-details dt { /* Term (label) */
+    font-weight: bold;
+    color: #333;
+    display: inline; /* Keep on same line as dd */
+    margin-right: 5px;
+}
+.knot-details dd { /* Description (value) */
+    display: inline;
+    margin-left: 0; /* Reset default dl margin */
+    color: #555;
+    /* Allow wrapping */
+    display: block; /* Change to block if you want value on new line */
+    margin-bottom: 5px; /* Add space between detail items */
 }
 
-/* Specific override for the Wikimedia video if it's not 16:9 */
-/* You might need a specific class or ID on that iframe's parent */
-/* Example: Give the bowline .knot-visual a class="wikimedia-video" */
-.knot-visual.wikimedia-video iframe {
-     aspect-ratio: 512 / 288; 
-}
+
+/* === Footer (Keep as is) === */
+footer { margin-top: 30px; font-size: 0.9em; color: #666; }

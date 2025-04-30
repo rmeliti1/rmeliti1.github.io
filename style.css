@@ -92,7 +92,11 @@ h4 {
     box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     display: flex; /* Use flexbox for internal layout */
     flex-direction: column;
-    transition: opacity 0.5s ease-in-out; /* For filtering animation */
+    /* === Animation Properties === */
+    opacity: 1;
+    transform: scale(1);
+    transition: opacity 0.4s ease-in-out, transform 0.4s ease-in-out, visibility 0s linear 0s; /* Add visibility transition */
+    visibility: visible; /* Start visible */
 }
 
 .knot-visual {
@@ -137,11 +141,21 @@ h4 {
 
 /* Class to hide knots during filtering */
 .knot-card.hidden {
-   display: none; /* Simple hide/show */
-   /* Or for animation:
+   /* Make invisible and non-interactive */
    opacity: 0;
-   transform: scale(0.9);
-   pointer-events: none; */
+   transform: scale(0.95); /* Slight scale down */
+   pointer-events: none;
+   visibility: hidden; /* Remove from layout flow after transition */
+   transition: opacity 0.4s ease-in-out, transform 0.4s ease-in-out, visibility 0s linear 0.4s; /* Delay visibility change */
+   /* === Crucial for grid layout: Remove the space it takes === */
+   /* We keep display: flex to allow flex properties, but control visibility/interaction */
+   /* Since we set visibility: hidden and pointer-events: none, it won't interfere */
+   /* The grid gap will handle spacing */
+    height: 0; /* Collapse height */
+    padding: 0; /* Collapse padding */
+    margin: 0; /* Collapse margin */
+    border: none; /* Remove border */
+    overflow: hidden; /* Hide content during collapse */
 }
 
 

@@ -1,170 +1,312 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>What Knot To Use? - Visual Guide</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
+<main id="knot-grid">
 
-    <header>
-        <h1>What Knot To Use?</h1>
-        <p>A visual guide to common knots and their uses.</p>
-    </header>
-
-    <nav id="filter-controls">
-        <h2>Filter by Use Case:</h2>
-        <button data-filter="all" class="active">Show All</button>
-        <button data-filter="joining">Joining Ropes</button>
-        <button data-filter="loop">Loops</button>
-        <button data-filter="hitch">Hitches</button>
-        <button data-filter="stopper">Stopper Knots</button>
-        <button data-filter="binding">Binding Knots</button>
-        <!-- Add more filters here if needed, e.g., characteristics -->
-        <!-- <button data-filter="easy-untie">Easy to Untie</button> -->
-    </nav>
-
-    <main id="knot-grid">
-
-        <!-- === Knot Example 1: Bowline (Loop) === -->
-        <div class="knot-card" data-usecase="loop" data-characteristics="secure easy-untie">
-            <h3>Bowline</h3>
-            <div class="knot-visual">
-                <!-- Embed GIF, Video, or use Image -->
-                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f3/Bowline_step_by_step_variant_2.gif/220px-Bowline_step_by_step_variant_2.gif" alt="How to tie a Bowline knot">
-                 <!-- Or: <video src="path/to/bowline.mp4" controls></video> -->
-            </div>
-            <div class="knot-info">
-                <h4>Description:</h4>
-                <p>Creates a fixed loop at the end of a rope. Known as the "King of Knots".</p>
-                <h4>Pros:</h4>
-                <ul>
-                    <li>Strong and secure loop.</li>
-                    <li>Relatively easy to untie, even after being loaded.</li>
-                    <li>Doesn't slip or bind.</li>
-                </ul>
-                <h4>Cons:</h4>
-                <ul>
-                    <li>Can potentially shake loose if not under load (less common with modern ropes).</li>
-                    <li>Cannot be tied or untied when weighted.</li>
-                </ul>
-                <h4>Typical Applications:</h4>
-                <p>Rescue, mooring boats, climbing (tying in, though figure-eight is more common now), attaching rope to objects.</p>
-            </div>
+    <!-- === Knot Example 1: Bowline (Loop) === -->
+    <div class="knot-card" data-usecase="loop" data-characteristics="secure easy-untie">
+        <h3>Bowline</h3>
+        <div class="knot-visual">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f3/Bowline_step_by_step_variant_2.gif/220px-Bowline_step_by_step_variant_2.gif" alt="How to tie a Bowline knot">
         </div>
-
-        <!-- === Knot Example 2: Square Knot (Joining/Binding) === -->
-        <div class="knot-card" data-usecase="joining binding" data-characteristics="simple">
-            <h3>Square Knot (Reef Knot)</h3>
-            <div class="knot-visual">
-                 <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/74/Reef_knot_steps.gif/220px-Reef_knot_steps.gif" alt="How to tie a Square Knot">
-            </div>
-            <div class="knot-info">
-                <h4>Description:</h4>
-                <p>A simple knot for joining two ropes of *equal* thickness or for binding.</p>
-                <h4>Pros:</h4>
-                <ul>
-                    <li>Very simple and quick to tie.</li>
-                    <li>Lies relatively flat.</li>
-                </ul>
-                <h4>Cons:</h4>
-                <ul>
-                    <li>**Unsafe for critical loads.** Can capsize or slip, especially with ropes of different diameters or synthetic ropes.</li>
-                    <li>Can jam tightly, making it hard to untie after loading.</li>
-                </ul>
-                <h4>Typical Applications:</h4>
-                <p>Tying bandages, securing parcels, reefing sails (its namesake), general non-critical binding. **Avoid using it to join climbing ropes or for rescue.**</p>
-            </div>
+        <div class="knot-info">
+            <h4>Description:</h4>
+            <p>Creates a fixed loop at the end of a rope. Known as the "King of Knots".</p>
+            <h4>Pros:</h4>
+            <ul>
+                <li>Strong and secure loop.</li>
+                <li>Relatively easy to untie, even after being loaded.</li>
+                <li>Doesn't slip or bind easily.</li>
+            </ul>
+            <h4>Cons:</h4>
+            <ul>
+                <li>Can potentially shake loose if not under load (less common with modern ropes). Consider a backup (e.g., Yosemite finish or stopper knot).</li>
+                <li>Cannot be tied or untied when weighted.</li>
+            </ul>
+            <h4>Typical Applications:</h4>
+            <p>Rescue, mooring boats, climbing (tying in, though figure-eight is more common now), attaching rope to objects.</p>
         </div>
+    </div>
 
-        <!-- === Knot Example 3: Clove Hitch (Hitch) === -->
-        <div class="knot-card" data-usecase="hitch" data-characteristics="adjustable quick">
-            <h3>Clove Hitch</h3>
-            <div class="knot-visual">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/08/Mastwurf_Schritt_fuer_Schritt.gif/220px-Mastwurf_Schritt_fuer_Schritt.gif" alt="How to tie a Clove Hitch">
-            </div>
-            <div class="knot-info">
-                <h4>Description:</h4>
-                <p>Used to fasten a rope to a post, rail, or another rope.</p>
-                <h4>Pros:</h4>
-                <ul>
-                    <li>Quick and easy to tie.</li>
-                    <li>Adjustable length without untying completely.</li>
-                    <li>Can be tied one-handed or in the middle of a rope.</li>
-                </ul>
-                <h4>Cons:</h4>
-                <ul>
-                    <li>Can slip under heavy or cyclical loads, especially on smooth surfaces.</li>
-                    <li>Can bind and become difficult to untie.</li>
-                </ul>
-                <h4>Typical Applications:</h4>
-                <p>Temporary moorings, starting lashings, securing tent guylines (often backed up), stagecraft rigging (non-critical).</p>
-            </div>
+    <!-- === Knot Example 2: Square Knot (Joining/Binding) === -->
+    <div class="knot-card" data-usecase="joining binding" data-characteristics="simple">
+        <h3>Square Knot (Reef Knot)</h3>
+        <div class="knot-visual">
+             <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/74/Reef_knot_steps.gif/220px-Reef_knot_steps.gif" alt="How to tie a Square Knot">
         </div>
-
-         <!-- === Knot Example 4: Figure-Eight Knot (Stopper/Loop) === -->
-        <div class="knot-card" data-usecase="stopper loop" data-characteristics="secure easy-inspect">
-            <h3>Figure-Eight Knot / Follow-Through</h3>
-            <div class="knot-visual">
-                 <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/3d/Figure_Eight_Follow_Through_steps_sequence.gif/220px-Figure_Eight_Follow_Through_steps_sequence.gif" alt="How to tie a Figure-Eight Follow Through">
-                 <p>(Shows Figure-Eight Follow-Through for loop)</p>
-                 <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/11/Figure_eight_knot_animated.gif/220px-Figure_eight_knot_animated.gif" alt="How to tie a Figure-Eight Stopper Knot">
-                 <p>(Shows simple Figure-Eight for stopper)</p>
-            </div>
-            <div class="knot-info">
-                <h4>Description:</h4>
-                <p>A fundamental knot. Used as a stopper knot on its own, or tied back on itself (follow-through) to create a strong, secure loop.</p>
-                <h4>Pros:</h4>
-                <ul>
-                    <li>Very strong and secure (especially the loop form).</li>
-                    <li>Relatively easy to inspect for correctness.</li>
-                    <li>Less prone to jamming than an Overhand knot.</li>
-                </ul>
-                <h4>Cons:</h4>
-                <ul>
-                    <li>Bulkier than some other knots (e.g., Overhand stopper, Bowline loop).</li>
-                    <li>Can be harder to untie after heavy loading than a Bowline.</li>
-                </ul>
-                <h4>Typical Applications:</h4>
-                <p><b>Stopper:</b> Preventing rope end from running through a device (belay device, pulley).<br><b>Loop (Follow-Through):</b> Standard knot for tying into a climbing harness, rescue applications, securing loads.</p>
-            </div>
+        <div class="knot-info">
+            <h4>Description:</h4>
+            <p>A simple knot for joining two ropes of *equal* thickness or for binding.</p>
+            <h4>Pros:</h4>
+            <ul>
+                <li>Very simple and quick to tie.</li>
+                <li>Lies relatively flat.</li>
+            </ul>
+            <h4>Cons:</h4>
+            <ul>
+                <li>**Unsafe for critical loads.** Can capsize or slip, especially with ropes of different diameters or slippery synthetic ropes.</li>
+                <li>Can jam tightly, making it hard to untie after loading.</li>
+            </ul>
+            <h4>Typical Applications:</h4>
+            <p>Tying bandages, securing parcels, reefing sails (its namesake), general non-critical binding. **Avoid using it to join climbing ropes or for rescue.**</p>
         </div>
+    </div>
 
-         <!-- === Knot Example 5: Sheet Bend (Joining) === -->
-        <div class="knot-card" data-usecase="joining" data-characteristics="different-ropes">
-            <h3>Sheet Bend</h3>
-            <div class="knot-visual">
-                 <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f4/Sheet_bend_animated.gif/220px-Sheet_bend_animated.gif" alt="How to tie a Sheet Bend">
-            </div>
-            <div class="knot-info">
-                <h4>Description:</h4>
-                <p>Used for joining two ropes, especially those of *unequal* thickness.</p>
-                <h4>Pros:</h4>
-                <ul>
-                    <li>Effective for joining ropes of different diameters.</li>
-                    <li>Relatively secure when properly tied and dressed.</li>
-                </ul>
-                <h4>Cons:</h4>
-                <ul>
-                    <li>Less secure than a Figure-Eight bend for critical loads.</li>
-                    <li>Can work loose if not kept under tension.</li>
-                    <li>A double sheet bend is more secure.</li>
-                </ul>
-                <h4>Typical Applications:</h4>
-                <p>Joining flags to halyards, extending ropes, net making, general utility where ropes of different sizes need connecting (non-critical).</p>
-            </div>
+    <!-- === Knot Example 3: Clove Hitch (Hitch) === -->
+    <div class="knot-card" data-usecase="hitch" data-characteristics="adjustable quick">
+        <h3>Clove Hitch</h3>
+        <div class="knot-visual">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/08/Mastwurf_Schritt_fuer_Schritt.gif/220px-Mastwurf_Schritt_fuer_Schritt.gif" alt="How to tie a Clove Hitch">
         </div>
+        <div class="knot-info">
+            <h4>Description:</h4>
+            <p>Used to fasten a rope to a post, rail, or another rope.</p>
+            <h4>Pros:</h4>
+            <ul>
+                <li>Quick and easy to tie.</li>
+                <li>Adjustable length without untying completely.</li>
+                <li>Can be tied one-handed or in the middle of a rope.</li>
+            </ul>
+            <h4>Cons:</h4>
+            <ul>
+                <li>Can slip under heavy or cyclical loads, especially on smooth surfaces. Often needs a backup knot (e.g., half-hitches).</li>
+                <li>Can bind and become difficult to untie.</li>
+            </ul>
+            <h4>Typical Applications:</h4>
+            <p>Temporary moorings, starting lashings, securing tent guylines (often backed up), stagecraft rigging (non-critical), securing fenders.</p>
+        </div>
+    </div>
 
-        <!-- === Add More Knot Cards Here Following the Same Structure === -->
-        <!-- Examples: Taut-line Hitch (hitch, adjustable), Constrictor Knot (binding), Overhand Knot (stopper) -->
+     <!-- === Knot Example 4: Figure-Eight Knot / Follow-Through (Stopper/Loop) === -->
+    <div class="knot-card" data-usecase="stopper loop" data-characteristics="secure easy-inspect">
+        <h3>Figure-Eight Knot / Follow-Through</h3>
+        <div class="knot-visual">
+             <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/3d/Figure_Eight_Follow_Through_steps_sequence.gif/220px-Figure_Eight_Follow_Through_steps_sequence.gif" alt="How to tie a Figure-Eight Follow Through">
+             <p>(Shows Figure-Eight Follow-Through for loop)</p>
+             <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/11/Figure_eight_knot_animated.gif/220px-Figure_eight_knot_animated.gif" alt="How to tie a Figure-Eight Stopper Knot">
+             <p>(Shows simple Figure-Eight for stopper)</p>
+        </div>
+        <div class="knot-info">
+            <h4>Description:</h4>
+            <p>A fundamental knot. Used as a stopper knot on its own, or tied back on itself (follow-through) to create a strong, secure loop.</p>
+            <h4>Pros:</h4>
+            <ul>
+                <li>Very strong and secure (especially the loop form).</li>
+                <li>Relatively easy to inspect for correctness.</li>
+                <li>Less prone to jamming than an Overhand knot.</li>
+            </ul>
+            <h4>Cons:</h4>
+            <ul>
+                <li>Bulkier than some other knots (e.g., Overhand stopper, Bowline loop).</li>
+                <li>Can be harder to untie after heavy loading than a Bowline.</li>
+            </ul>
+            <h4>Typical Applications:</h4>
+            <p><b>Stopper:</b> Preventing rope end from running through a device (belay device, pulley).<br><b>Loop (Follow-Through):</b> Standard knot for tying into a climbing harness, rescue applications, securing loads.</p>
+        </div>
+    </div>
 
-    </main>
+     <!-- === Knot Example 5: Sheet Bend (Joining) === -->
+    <div class="knot-card" data-usecase="joining" data-characteristics="different-ropes">
+        <h3>Sheet Bend</h3>
+        <div class="knot-visual">
+             <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f4/Sheet_bend_animated.gif/220px-Sheet_bend_animated.gif" alt="How to tie a Sheet Bend">
+        </div>
+        <div class="knot-info">
+            <h4>Description:</h4>
+            <p>Used for joining two ropes, especially those of *unequal* thickness. Ensure free ends are on the *same* side.</p>
+            <h4>Pros:</h4>
+            <ul>
+                <li>Effective for joining ropes of different diameters or materials.</li>
+                <li>Relatively secure when properly tied and dressed.</li>
+            </ul>
+            <h4>Cons:</h4>
+            <ul>
+                <li>Less secure than a Figure-Eight bend or Double Fisherman's for critical loads.</li>
+                <li>Can work loose if not kept under tension, especially with synthetic ropes.</li>
+                <li>A Double Sheet Bend is more secure but bulkier.</li>
+            </ul>
+            <h4>Typical Applications:</h4>
+            <p>Joining flags to halyards, extending ropes, net making, general utility where ropes of different sizes need connecting (non-critical).</p>
+        </div>
+    </div>
 
-    <footer>
-        <p>Disclaimer: Knot tying requires practice. Improperly tied knots can fail. Always learn from a qualified source and practice before relying on a knot for safety.</p>
-    </footer>
+    <!-- === Knot Example 6: Taut-Line Hitch (Hitch/Loop) === -->
+    <div class="knot-card" data-usecase="hitch loop" data-characteristics="adjustable">
+        <h3>Taut-Line Hitch</h3>
+        <div class="knot-visual">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/4b/Midshipmans_hitch_how_to_animate.gif/220px-Midshipmans_hitch_how_to_animate.gif" alt="How to tie a Taut-Line Hitch (Midshipman's shown, similar principle)">
+            <p>(Midshipman's Hitch shown - often preferred, works similarly)</p>
+        </div>
+        <div class="knot-info">
+            <h4>Description:</h4>
+            <p>Creates an adjustable loop or attaches a rope to an object, allowing the line to be tightened or loosened.</p>
+            <h4>Pros:</h4>
+            <ul>
+                <li>Adjustable under tension.</li>
+                <li>Grips well when loaded.</li>
+                <li>Relatively easy to tie.</li>
+            </ul>
+            <h4>Cons:</h4>
+            <ul>
+                <li>Can slip if not tied correctly or with very slick ropes.</li>
+                <li>Less secure than fixed loops for permanent or critical attachments.</li>
+            </ul>
+            <h4>Typical Applications:</h4>
+            <p>Tent guylines, clotheslines, securing loads on trailers or roof racks (where adjustability is needed), securing tarps.</p>
+        </div>
+    </div>
 
-    <script src="script.js"></script>
-</body>
-</html>
+    <!-- === Knot Example 7: Two Half-Hitches (Hitch) === -->
+    <div class="knot-card" data-usecase="hitch" data-characteristics="simple quick">
+        <h3>Two Half-Hitches</h3>
+        <div class="knot-visual">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d6/Two_half-hitches_animated.gif/220px-Two_half-hitches_animated.gif" alt="How to tie Two Half-Hitches">
+        </div>
+        <div class="knot-info">
+            <h4>Description:</h4>
+            <p>A very simple and common hitch for temporarily securing a rope to a post, ring, or rail.</p>
+            <h4>Pros:</h4>
+            <ul>
+                <li>Extremely easy and quick to tie.</li>
+                <li>Easy to remember.</li>
+            </ul>
+            <h4>Cons:</h4>
+            <ul>
+                <li>Not very secure; can slip or bind, especially under heavy or variable load.</li>
+                <li>Not suitable for critical applications or smooth objects.</li>
+                <li>Less secure than a Clove Hitch or Bowline.</li>
+            </ul>
+            <h4>Typical Applications:</h4>
+            <p>Temporary fastening of light loads, tying painters to docks (briefly), clotheslines, general non-critical utility hitching.</p>
+        </div>
+    </div>
+
+    <!-- === Knot Example 8: Overhand Knot (Stopper) === -->
+    <div class="knot-card" data-usecase="stopper" data-characteristics="simple">
+        <h3>Overhand Knot</h3>
+        <div class="knot-visual">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/fe/Overhand_knot_animated.gif/220px-Overhand_knot_animated.gif" alt="How to tie an Overhand Knot">
+        </div>
+        <div class="knot-info">
+            <h4>Description:</h4>
+            <p>The simplest knot, forms the basis for many others. Used primarily as a basic stopper knot.</p>
+            <h4>Pros:</h4>
+            <ul>
+                <li>Extremely simple and fast to tie.</li>
+                <li>Small and compact.</li>
+            </ul>
+            <h4>Cons:</h4>
+            <ul>
+                <li>Can jam very tightly, becoming extremely difficult or impossible to untie after heavy loading.</li>
+                <li>Weakens the rope more than other stopper knots like the Figure-Eight.</li>
+                <li>Can roll off the end of the rope under certain conditions.</li>
+            </ul>
+            <h4>Typical Applications:</h4>
+            <p>Simple stopper knot for non-critical uses (e.g., preventing thread end from fraying), temporary knot at rope end, base for other knots (like the Water Knot).</p>
+        </div>
+    </div>
+
+    <!-- === Knot Example 9: Alpine Butterfly Loop (Loop) === -->
+    <div class="knot-card" data-usecase="loop" data-characteristics="secure mid-rope easy-untie">
+        <h3>Alpine Butterfly Loop</h3>
+        <div class="knot-visual">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/Alpine_butterfly_knot_animated.gif/220px-Alpine_butterfly_knot_animated.gif" alt="How to tie an Alpine Butterfly Loop">
+        </div>
+        <div class="knot-info">
+            <h4>Description:</h4>
+            <p>Forms a secure, fixed loop in the middle of a rope, without needing access to the ends.</p>
+            <h4>Pros:</h4>
+            <ul>
+                <li>Strong and stable loop that can be loaded in any direction (loop itself, or either standing end).</li>
+                <li>Relatively easy to untie, even after loading.</li>
+                <li>Can be tied in the bight (middle) of the rope.</li>
+            </ul>
+            <h4>Cons:</h4>
+            <ul>
+                <li>Slightly more complex to tie than some other loops.</li>
+                <li>Can be visually confusing to inspect if unfamiliar.</li>
+            </ul>
+            <h4>Typical Applications:</h4>
+            <p>Climbing (isolating damaged rope section, creating mid-rope anchor points, glacier travel), rescue work, creating attachment points along a line.</p>
+        </div>
+    </div>
+
+    <!-- === Knot Example 10: Double Fisherman's Bend (Joining) === -->
+    <div class="knot-card" data-usecase="joining" data-characteristics="secure permanent">
+        <h3>Double Fisherman's Bend</h3>
+        <div class="knot-visual">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6d/Double_fishermans_knot_animated.gif/220px-Double_fishermans_knot_animated.gif" alt="How to tie a Double Fisherman's Bend">
+        </div>
+        <div class="knot-info">
+            <h4>Description:</h4>
+            <p>A very strong and secure method for joining two ropes, especially similar-diameter synthetic ropes.</p>
+            <h4>Pros:</h4>
+            <ul>
+                <li>Extremely secure and reliable, standard for joining climbing ropes.</li>
+                <li>Relatively compact.</li>
+            </ul>
+            <h4>Cons:</h4>
+            <ul>
+                <li>Can become virtually impossible to untie after being heavily loaded, often considered permanent.</li>
+                <li>Can be difficult to tie correctly and requires careful dressing.</li>
+            </ul>
+            <h4>Typical Applications:</h4>
+            <p>Joining climbing ropes (e.g., for rappelling), making rope loops (prussik loops, cordelettes), any application requiring a highly secure, near-permanent join.</p>
+        </div>
+    </div>
+
+    <!-- === Knot Example 11: Prusik Knot (Hitch) === -->
+    <div class="knot-card" data-usecase="hitch" data-characteristics="friction ascending">
+        <h3>Prusik Knot</h3>
+        <div class="knot-visual">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a3/Prusik_knot_animated.gif/220px-Prusik_knot_animated.gif" alt="How to tie a Prusik Knot">
+        </div>
+        <div class="knot-info">
+            <h4>Description:</h4>
+            <p>A friction hitch tied with a loop of cord around a thicker rope. Grips when loaded, slides when unloaded.</p>
+            <h4>Pros:</h4>
+            <ul>
+                <li>Grips well in both directions along the main rope.</li>
+                <li>Can be slid along the rope when not weighted.</li>
+                <li>Relatively simple concept.</li>
+            </ul>
+            <h4>Cons:</h4>
+            <ul>
+                <li>Requires a loop of cord (usually thinner than the main rope).</li>
+                <li>Can jam after heavy loading or slip if the diameter difference isn't sufficient or if ropes are wet/icy.</li>
+                <li>Other friction hitches (e.g., Klemheist, Bachmann) may perform better in some situations.</li>
+            </ul>
+            <h4>Typical Applications:</h4>
+            <p>Climbing (ascending ropes, progress capture in hauling systems, rappel backup - use caution), rescue work, arborist work.</p>
+        </div>
+    </div>
+
+    <!-- === Knot Example 12: Trucker's Hitch (Hitch) === -->
+    <div class="knot-card" data-usecase="hitch binding" data-characteristics="mechanical-advantage adjustable">
+        <h3>Trucker's Hitch</h3>
+        <div class="knot-visual">
+            <!-- Note: Multiple ways to tie this, visual shows one common method -->
+             <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d5/Truckers_Hitch_Animated.gif/220px-Truckers_Hitch_Animated.gif" alt="How to tie a Trucker's Hitch">
+             <p>(Shows one common version)</p>
+        </div>
+        <div class="knot-info">
+            <h4>Description:</h4>
+            <p>A compound knot system providing mechanical advantage (typically 3:1) to tighten a line securely.</p>
+            <h4>Pros:</h4>
+            <ul>
+                <li>Provides significant tightening power.</li>
+                <li>Relatively easy to release.</li>
+                <li>Versatile for securing loads.</li>
+            </ul>
+            <h4>Cons:</h4>
+            <ul>
+                <li>More complex than simple hitches.</li>
+                <li>Reliability depends on the loop knot used (e.g., slippery loop can fail).</li>
+                <li>Can cause high friction and wear on the rope at the loop turn.</li>
+            </ul>
+            <h4>Typical Applications:</h4>
+            <p>Securing loads on trucks, trailers, roof racks; creating high-tension ridgelines for tarps; clotheslines; general load securing.</p>
+        </div>
+    </div>
+
+
+    <!-- === Add More Knot Cards Here === -->
+
+</main>

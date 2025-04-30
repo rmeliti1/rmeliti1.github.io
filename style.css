@@ -1,164 +1,98 @@
-/* Basic Reset & Body */
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-}
-
-body {
-    font-family: sans-serif;
-    line-height: 1.6;
-    color: #333;
-    background-color: #f4f4f4;
-    padding: 20px;
-}
-
-header, footer {
-    text-align: center;
-    margin-bottom: 20px;
-    padding: 10px;
-    background-color: #e2e2e2;
-    border-radius: 5px;
-}
-
-h1 {
-    color: #0056b3;
-    margin-bottom: 5px;
-}
-
-h3 {
-    color: #0056b3;
-    margin-bottom: 10px;
-    border-bottom: 1px solid #ccc;
-    padding-bottom: 5px;
-}
-
-h4 {
-    margin-top: 15px;
-    margin-bottom: 5px;
-    color: #555;
-}
-
-/* Filter Controls */
-#filter-controls {
-    text-align: center;
-    margin-bottom: 30px;
-    padding: 15px;
-    background: #fff;
-    border-radius: 5px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-}
-
-#filter-controls h2 {
-    margin-bottom: 10px;
-    font-size: 1.2em;
-}
-
-#filter-controls button {
-    padding: 8px 15px;
-    margin: 5px;
-    cursor: pointer;
-    border: 1px solid #ccc;
-    background-color: #f8f8f8;
-    border-radius: 4px;
-    transition: background-color 0.3s ease, border-color 0.3s ease;
-}
-
-#filter-controls button:hover {
-    background-color: #e9e9e9;
-    border-color: #bbb;
-}
-
-#filter-controls button.active {
-    background-color: #007bff;
-    color: white;
-    border-color: #0056b3;
-}
+/* --- Existing CSS --- */
+/* (Keep your other styles: body, header, nav, .knot-visual, etc.) */
 
 /* Knot Grid Layout */
 #knot-grid {
     display: grid;
-    /* Adjust minmax for desired card size */
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     gap: 20px;
+    /* Add transition for smoother reflow when children change */
+    transition: all 0.4s ease-in-out; /* Optional: helps grid animate changes */
 }
 
-/* Individual Knot Cards */
+/* Individual Knot Cards - Update Transitions */
 .knot-card {
     background-color: #fff;
-    border: 1px solid #ddd;
+    border: 1px solid #ddd; /* Ensure border is defined */
     border-radius: 5px;
-    padding: 15px;
+    padding: 15px;         /* Ensure padding is defined */
     box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    display: flex; /* Use flexbox for internal layout */
+    display: flex;
     flex-direction: column;
-    /* === Animation Properties === */
+    overflow: hidden;      /* Important: Prevents content spill during collapse */
+    margin-bottom: 0; /* Let grid gap handle vertical spacing if needed */
+
+    /* === Animation Properties (Normal State) === */
     opacity: 1;
     transform: scale(1);
-    transition: opacity 0.4s ease-in-out, transform 0.4s ease-in-out, visibility 0s linear 0s; /* Add visibility transition */
-    visibility: visible; /* Start visible */
+    visibility: visible;
+    height: auto; /* Or an estimated height if needed, but auto is preferred */
+    border-width: 1px; /* Explicit border width */
+
+    /* === UPDATED Transition Definition === */
+    /* Transition ALL properties that will change in the .hidden state */
+    transition: opacity 0.4s ease-in-out,
+                transform 0.4s ease-in-out,
+                height 0.4s ease-in-out,      /* Animate height */
+                padding-top 0.4s ease-in-out, /* Animate padding */
+                padding-bottom 0.4s ease-in-out,
+                margin-top 0.4s ease-in-out,  /* Animate margins */
+                margin-bottom 0.4s ease-in-out,
+                border-width 0.4s ease-in-out, /* Animate border width */
+                visibility 0s linear 0s;     /* Show immediately */
 }
 
-.knot-visual img,
-.knot-visual video, /* Add iframe to this rule */
-.knot-visual iframe { 
-    max-width: 100%;  /* Ensures it doesn't overflow the container */
-    height: auto;     /* Let the browser calculate height based on aspect ratio */
-    display: block;   /* Removes potential extra space below */
-    margin: 5px auto; /* Center if needed */
-    border: none; /* Remove any default iframe border (frameborder="0" also does this) */
-    
-    /* === Add this line to maintain proportions === */
-    /* Calculate from original: 512 / 288 */
-    aspect-ratio: 512 / 288; 
-}
-.knot-visual p {
-    font-size: 0.8em;
-    color: #666;
-    margin-top: 5px;
-}
 
-.knot-info {
-    flex-grow: 1; /* Allows info section to fill space */
-}
-
-.knot-info ul {
-    list-style: disc;
-    margin-left: 20px;
-    margin-bottom: 10px;
-}
-
-.knot-info li {
-    margin-bottom: 5px;
-}
-
-.knot-info p {
-    margin-bottom: 10px;
-}
-
-/* Class to hide knots during filtering */
+/* Class to hide knots during filtering - UPDATE Properties and Transition */
 .knot-card.hidden {
-   /* Make invisible and non-interactive */
+   /* Make invisible */
    opacity: 0;
-   transform: scale(0.95); /* Slight scale down */
+   transform: scale(0.95); /* Optional: slight scale down */
    pointer-events: none;
-   visibility: hidden; /* Remove from layout flow after transition */
-   transition: opacity 0.4s ease-in-out, transform 0.4s ease-in-out, visibility 0s linear 0.4s; /* Delay visibility change */
-   /* === Crucial for grid layout: Remove the space it takes === */
-   /* We keep display: flex to allow flex properties, but control visibility/interaction */
-   /* Since we set visibility: hidden and pointer-events: none, it won't interfere */
-   /* The grid gap will handle spacing */
-    height: 0; /* Collapse height */
-    padding: 0; /* Collapse padding */
-    margin: 0; /* Collapse margin */
-    border: none; /* Remove border */
-    overflow: hidden; /* Hide content during collapse */
+
+   /* === Collapse the element's space === */
+   height: 0;           /* Collapse height */
+   padding-top: 0;      /* Collapse padding */
+   padding-bottom: 0;
+   margin-top: 0;       /* Collapse margin */
+   margin-bottom: 0;
+   border-width: 0;     /* Collapse border */
+   overflow: hidden;      /* Ensure content is clipped */
+
+   /* Remove from layout flow *after* transition */
+   visibility: hidden;
+
+   /* === UPDATED Transition for .hidden state === */
+   /* Apply same duration to layout properties as opacity/transform */
+   /* Keep visibility delayed to match animation duration */
+   transition: opacity 0.4s ease-in-out,
+               transform 0.4s ease-in-out,
+               height 0.4s ease-in-out,
+               padding-top 0.4s ease-in-out,
+               padding-bottom 0.4s ease-in-out,
+               margin-top 0.4s ease-in-out,
+               margin-bottom 0.4s ease-in-out,
+               border-width 0.4s ease-in-out,
+               visibility 0s linear 0.4s; /* Delay visibility change */
 }
 
+/* ... (Rest of your CSS, e.g., .knot-visual, footer, etc.) ... */
 
-/* Footer */
-footer {
-    margin-top: 30px;
-    font-size: 0.9em;
-    color: #666;
+/* Ensure iframe styling is still correct */
+.knot-visual img,
+.knot-visual video, 
+.knot-visual iframe { 
+    max-width: 100%;  
+    height: auto;     
+    display: block;   
+    margin: 5px auto; 
+    border: none; 
+    aspect-ratio: 16 / 9; /* Or adjust per video if needed */
+}
+
+/* Specific override for the Wikimedia video if it's not 16:9 */
+/* You might need a specific class or ID on that iframe's parent */
+/* Example: Give the bowline .knot-visual a class="wikimedia-video" */
+.knot-visual.wikimedia-video iframe {
+     aspect-ratio: 512 / 288; 
 }

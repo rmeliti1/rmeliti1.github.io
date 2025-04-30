@@ -1,34 +1,52 @@
-// Wait until the HTML document is fully loaded before running the script
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', () => {
+    const filterControls = document.getElementById('filter-controls');
+    const knotGrid = document.getElementById('knot-grid');
+    const knotCards = knotGrid.querySelectorAll('.knot-card');
+    const filterButtons = filterControls.querySelectorAll('button');
 
-    // Get references to the button and the message area
-    const button = document.getElementById('myButton');
-    const messageArea = document.getElementById('messageArea');
-    const dateSpan = document.getElementById('creationDate');
+    filterControls.addEventListener('click', (event) => {
+        // Only run if a button was clicked
+        if (event.target.tagName !== 'BUTTON') {
+            return;
+        }
 
-    // Check if the button exists on the page
-    if (button) {
-        // Add an event listener to the button
-        button.addEventListener('click', function() {
-            // Change the text content of the message area when the button is clicked
-            if (messageArea) {
-                messageArea.textContent = 'Yay! The button was clicked and the JavaScript is working!';
+        const filterValue = event.target.getAttribute('data-filter');
+
+        // Update active button style
+        filterButtons.forEach(button => {
+            button.classList.remove('active');
+        });
+        event.target.classList.add('active');
+
+        // Filter the knot cards
+        knotCards.forEach(card => {
+            const useCases = card.getAttribute('data-usecase').split(' '); // Get use cases as an array
+            // const characteristics = card.getAttribute('data-characteristics').split(' '); // Future use
+
+            // Check if the card should be shown
+            let showCard = false;
+            if (filterValue === 'all') {
+                showCard = true;
+            } else if (useCases.includes(filterValue)) {
+                // Simple check if the filter matches any use case
+                showCard = true;
+            }
+            // Add more complex filtering here if needed (e.g., for characteristics)
+            // else if (characteristics.includes(filterValue)) {
+            //     showCard = true;
+            // }
+
+
+            // Show or hide the card
+            if (showCard) {
+                card.classList.remove('hidden');
             } else {
-                console.error('Message area element not found!');
+                card.classList.add('hidden');
             }
         });
-    } else {
-        console.error('Button element not found!');
-    }
+    });
 
-    // Display the current date in the footer
-    if (dateSpan) {
-        const today = new Date();
-        // Format date as Month Day, Year (e.g., April 30, 2025)
-        const options = { year: 'numeric', month: 'long', day: 'numeric' };
-        dateSpan.textContent = today.toLocaleDateString('en-US', options);
-    } else {
-         console.error('Creation date span not found!');
-    }
-
+    // Optional: Trigger the 'all' filter on page load to ensure proper initial state
+    // (Though CSS handles initial visibility, this ensures consistency if JS loads late)
+    // filterButtons[0].click(); // Simulate a click on the "Show All" button
 });

@@ -99,21 +99,18 @@ h4 {
     visibility: visible; /* Start visible */
 }
 
-.knot-visual {
-    text-align: center;
-    margin-bottom: 15px;
-    background-color: #f0f0f0; /* Light background for visuals */
-    padding: 10px;
-    border-radius: 4px;
-}
-
 .knot-visual img,
-.knot-visual video { /* Style embedded videos similarly */
-    max-width: 100%;
-    height: auto;
-    display: block; /* Remove extra space below image */
+.knot-visual video, /* Add iframe to this rule */
+.knot-visual iframe { 
+    max-width: 100%;  /* Ensures it doesn't overflow the container */
+    height: auto;     /* Let the browser calculate height based on aspect ratio */
+    display: block;   /* Removes potential extra space below */
     margin: 5px auto; /* Center if needed */
-    border: 1px solid #ccc;
+    border: none; /* Remove any default iframe border (frameborder="0" also does this) */
+    
+    /* === Add this line to maintain proportions === */
+    /* Calculate from original: 512 / 288 */
+    aspect-ratio: 512 / 288; 
 }
 .knot-visual p {
     font-size: 0.8em;

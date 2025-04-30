@@ -1,4 +1,36 @@
- <main id="knot-grid">
+<!DOCTYPE html>
+ <html lang="en">
+ <head>
+     <meta charset="UTF-8">
+     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+     <title>What Knot To Use? - Visual Guide</title>
+     
+     <!-- CSS Link: Checks out -->
+     <!-- Assumes style.css is in the SAME directory as this index.html -->
+     <!-- If style.css is in a 'css' subfolder, change href to "css/style.css" -->
+     <link rel="stylesheet" href="style.css"> 
+ </head>
+ <body>
+ 
+     <header>
+         <h1>What Knot To Use?</h1>
+         <p>A visual guide to common knots and their uses.</p>
+     </header>
+ 
+     <!-- Filter Controls: Checks out -->
+     <!-- Has the id="filter-controls" needed by the JS -->
+     <!-- Contains <button> elements with data-filter attributes needed by JS -->
+     <nav id="filter-controls">
+         <h2>Filter by Use Case:</h2>
+         <button data-filter="all" class="active">Show All</button> <!-- JS will manage the 'active' class -->
+         <button data-filter="joining">Joining Ropes</button>
+         <button data-filter="loop">Loops</button>
+         <button data-filter="hitch">Hitches</button>
+         <button data-filter="stopper">Stopper Knots</button>
+         <button data-filter="binding">Binding Knots</button>
+         <!-- Add more filters here if needed -->
+     </nav>
+  <main id="knot-grid">
 
     <!-- === Knot Example 1: Bowline (Loop) === -->
     <div class="knot-card" data-usecase="loop" data-characteristics="secure easy-untie fixed-loop essential">
@@ -394,6 +426,11 @@
             <h4>Typical Applications:</h4>
             <p>Creating adjustable snubbers on mooring lines, attaching a rope to a taut line (e.g., anchor rode), hauling along a fixed line, backup for other hitches.</p>
         </div>
+       <script src="script.js"></script> 
      </div>
+
+   </body>
+ </html>
+
 
 </main>

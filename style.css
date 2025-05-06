@@ -1,5 +1,6 @@
 /* === Basic Reset & Body === */
 * { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; } /* For direct linking fallback and back-to-top */
 body { font-family: sans-serif; line-height: 1.6; color: #333; background-color: #f4f4f4; padding: 20px; }
 header, footer { text-align: center; margin-bottom: 20px; padding: 10px; background-color: #e2e2e2; border-radius: 5px; }
 h1 { color: #0056b3; margin-bottom: 5px; }
@@ -16,12 +17,23 @@ h1 { color: #0056b3; margin-bottom: 5px; }
     gap: 20px;
 }
 
+/* Search and Sort combined */
+#search-sort-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    align-items: center;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 20px;
+}
+
 /* === Search Controls Styling === */
 #search-controls {
     display: flex;
     align-items: center;
     gap: 10px;
-    flex-wrap: wrap; /* Allow wrapping on small screens */
+    flex-grow: 3; /* Takes more space */
+    min-width: 300px; /* Minimum width before wrapping */
 }
 #search-controls label {
     font-weight: bold;
@@ -34,10 +46,9 @@ h1 { color: #0056b3; margin-bottom: 5px; }
     border-radius: 4px;
     font-size: 1em;
     flex-grow: 1;
-    min-width: 200px; /* Ensure input doesn't get too small */
 }
 #clear-search-btn {
-    padding: 9px 12px; /* Match height of input better */
+    padding: 9px 12px;
     cursor: pointer;
     border: 1px solid #ccc;
     background-color: #f0f0f0;
@@ -50,18 +61,46 @@ h1 { color: #0056b3; margin-bottom: 5px; }
     background-color: #e0e0e0;
 }
 
-/* === Filter Controls Styling === */
+/* === Sort Controls Styling === */
+#sort-controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-grow: 1; /* Takes less space than search */
+    min-width: 200px;
+}
+#sort-controls label {
+    font-weight: bold;
+    color: #333;
+    flex-shrink: 0;
+}
+#sort-controls select {
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 1em;
+    background-color: white;
+    flex-grow: 1;
+}
+
+/* === Filter Controls Wrapper === */
+#filter-controls-wrapper {
+    display: flex;
+    flex-direction: column; /* Stack filters above overall controls */
+    gap: 15px;
+}
+
 #filter-controls {
     display: flex;
     flex-wrap: wrap;
     gap: 25px;
-    justify-content: flex-start; /* Align groups to the start */
+    justify-content: flex-start;
 }
 .filter-group {
     border: none;
     padding: 0;
     margin: 0;
-    text-align: left; /* Align legend and buttons to the left */
+    text-align: left;
 }
 .filter-group legend {
     font-weight: bold;
@@ -69,12 +108,12 @@ h1 { color: #0056b3; margin-bottom: 5px; }
     font-size: 1.1em;
     color: #444;
     padding: 0;
-    width: auto; /* Don't force full width */
-    display: block; /* Ensure it's on its own line */
+    width: auto;
+    display: block;
 }
 .filter-group button {
     padding: 6px 12px;
-    margin: 3px 5px 3px 0; /* Adjust margin for left alignment */
+    margin: 3px 5px 3px 0;
     cursor: pointer;
     border: 1px solid #ccc;
     background-color: #f8f8f8;
@@ -103,8 +142,7 @@ h1 { color: #0056b3; margin-bottom: 5px; }
 
 /* === Overall Controls (Reset All) === */
 #overall-controls {
-    margin-top: 10px; /* Add some space above it */
-    text-align: right; /* Align button to the right */
+    text-align: right;
 }
 #clear-all-filters-btn {
     padding: 8px 15px;
@@ -126,7 +164,6 @@ h1 { color: #0056b3; margin-bottom: 5px; }
     cursor: not-allowed;
 }
 
-
 /* === Loading Indicator === */
 #loading-indicator {
     text-align: center;
@@ -139,9 +176,9 @@ h1 { color: #0056b3; margin-bottom: 5px; }
 /* === Knot Grid & Cards === */
 #knot-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(330px, 1fr)); /* Slightly wider min for permalink button */
     gap: 20px;
-    transition: opacity 0.3s ease-in-out; /* Simpler transition for grid show/hide */
+    transition: opacity 0.3s ease-in-out;
 }
 #knot-grid.hidden {
     opacity: 0;
@@ -157,51 +194,41 @@ h1 { color: #0056b3; margin-bottom: 5px; }
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    margin-bottom: 0;
-    opacity: 1;
-    transform: scale(1);
-    visibility: visible;
-    border-width: 1px;
-    transition-property: opacity, transform, height, padding, margin, border-width, visibility;
-    transition-duration: 0.4s;
-    transition-timing-function: ease-in-out;
-    transition-delay: 0s, 0s, 0s, 0s, 0s, 0s, 0s;
-}
-/*
-   Note on .knot-card.hidden:
-   The current complex transition on .knot-card.hidden from the original CSS is for individual
-   card animations if you were to hide/show them one by one.
-   Since we are re-rendering the whole grid (`knotGrid.innerHTML = ...`),
-   this specific .hidden class on .knot-card might not be strictly necessary for filtering,
-   as non-matching cards are simply not rendered.
-   However, keeping it doesn't hurt and might be useful if you implement per-card
-   animations later. If you were to use it, ensure `displayKnots` adds/removes this class
-   to individual cards instead of full innerHTML rewrite for that animation to work.
-   For now, the opacity transition on #knot-grid itself handles the general show/hide.
-*/
-.knot-card.hidden-transition { /* Example if you wanted to animate individual cards */
-   opacity: 0;
-   transform: scale(0.95);
-   pointer-events: none;
-   height: 0;
-   padding-top: 0;
-   padding-bottom: 0;
-   margin-top: 0;
-   margin-bottom: 0;
-   border-width: 0;
-   visibility: hidden;
-   transition-delay: 0s, 0s, 0s, 0s, 0s, 0s, 0.4s;
+    transition: box-shadow 0.3s ease, transform 0.3s ease; /* For highlight */
 }
 
+.knot-card.highlighted-knot {
+    box-shadow: 0 0 0 3px #007bff, 0 5px 15px rgba(0,123,255,0.3);
+    transform: scale(1.01);
+}
 
 /* Card Content Styles */
+.knot-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #ccc;
+    margin-bottom: 10px;
+    padding-bottom: 5px;
+}
 .knot-card h3 {
     color: #0056b3;
-    margin-bottom: 10px;
-    border-bottom: 1px solid #ccc;
-    padding-bottom: 5px;
     font-size: 1.2em;
+    margin-bottom: 0; /* Handled by header padding */
 }
+.permalink-btn {
+    background: none;
+    border: none;
+    font-size: 1.3em; /* Make icon larger */
+    cursor: pointer;
+    padding: 0 5px;
+    color: #777;
+    transition: color 0.2s ease;
+}
+.permalink-btn:hover {
+    color: #0056b3;
+}
+
 .knot-card h4 {
     margin-top: 15px;
     margin-bottom: 5px;
@@ -212,17 +239,14 @@ h1 { color: #0056b3; margin-bottom: 5px; }
 
 /* === Knot Visual & Info === */
 .knot-visual { text-align: center; margin-bottom: 15px; background-color: #f0f0f0; padding: 10px; border-radius: 4px; }
-.knot-visual .visual-item { margin-bottom: 10px; } /* Space between multiple visual items */
+.knot-visual .visual-item { margin-bottom: 10px; }
 .knot-visual .visual-item:last-child { margin-bottom: 0; }
-
 .knot-visual img, .knot-visual video, .knot-visual iframe {
     max-width: 100%;
-    height: auto; /* Maintain intrinsic aspect ratio unless overridden by style attribute */
+    height: auto;
     display: block;
-    margin: 0 auto 5px auto; /* Center and add small margin below media */
+    margin: 0 auto 5px auto;
     border: none;
-    /* Default aspect ratio for iframes that don't have one specified, or other elements if needed */
-    /* aspect-ratio: 16 / 9; (Removed this default from here, will be applied by JS if present in JSON) */
 }
 .knot-visual p.attribution { font-size: 0.75em; color: #666; margin-top: 2px; text-align: center; line-height: 1.2; }
 .knot-visual p.attribution a { color: #0056b3; text-decoration: none; }
@@ -242,33 +266,50 @@ h1 { color: #0056b3; margin-bottom: 5px; }
     border-left: 3px solid #007bff;
     font-size: 0.9em;
 }
-.knot-details dt {
-    font-weight: bold;
-    color: #333;
-    display: block;
-    margin-bottom: 2px;
-}
-.knot-details dd {
-    display: block;
-    margin-left: 0;
-    color: #555;
-    margin-bottom: 8px;
-}
-.knot-details dd:last-of-type {
-    margin-bottom: 0;
-}
+.knot-details dt { font-weight: bold; color: #333; display: block; margin-bottom: 2px; }
+.knot-details dd { display: block; margin-left: 0; color: #555; margin-bottom: 8px; }
+.knot-details dd:last-of-type { margin-bottom: 0; }
 
 /* === No Results Message === */
 #no-results-message {
     text-align: center;
-    margin-top: 20px;
-    padding: 15px;
+    margin-top: 30px;
+    padding: 20px;
     background-color: #fff3cd;
     border: 1px solid #ffeeba;
     color: #856404;
     border-radius: 4px;
+    font-size: 1.1em;
     font-weight: bold;
 }
+
+/* === Back to Top Button === */
+#back-to-top {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    font-size: 24px;
+    text-align: center;
+    line-height: 50px;
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    transition: opacity 0.3s ease, background-color 0.3s ease;
+    z-index: 1000;
+}
+#back-to-top:hover {
+    background-color: #0056b3;
+}
+#back-to-top.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
 
 /* === Utility: Hidden Class === */
 .hidden {

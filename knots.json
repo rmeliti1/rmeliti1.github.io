@@ -92,8 +92,8 @@
     "visual": {
        "type": "multiple",
        "items": [
-         { "type": "iframe", "src": "https://www.youtube.com/embed/GFlwrvggas0?si=ZtK0zfx0k8tP_hoO&start=4", "title": "YouTube video player", "attribution": "(Figure-Eight Follow-Through for loop)" },
-         { "type": "iframe", "src": "https://www.youtube.com/embed/Jehd_61AsN0?si=PG6FtpwIpLWdb0PE", "title": "YouTube video player", "attribution": "(Simple Figure-Eight for stopper)" }
+         { "type": "iframe", "src": "https://www.youtube.com/embed/GFlwrvggas0?si=ZtK0zfx0k8tP_hoO&start=4", "title": "YouTube video player - Figure-Eight Follow-Through", "attribution": "(Figure-Eight Follow-Through for loop)" },
+         { "type": "iframe", "src": "https://www.youtube.com/embed/Jehd_61AsN0?si=PG6FtpwIpLWdb0PE", "title": "YouTube video player - Simple Figure-Eight", "attribution": "(Simple Figure-Eight for stopper)" }
        ]
     },
     "description": "Fundamental knot used as a stopper or tied back on itself (follow-through) for a strong loop.",

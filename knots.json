@@ -2,6 +2,7 @@
   {
     "id": "bowline",
     "name": "Bowline (Palstek)",
+    "alternativeNames": ["Bo'line", "King of Knots"],
     "usecases": ["loop"],
     "characteristics": ["secure", "easy-untie", "fixed-loop", "essential"],
     "visual": {
@@ -31,6 +32,7 @@
   {
     "id": "square-knot",
     "name": "Square Knot (Reef Knot)",
+    "alternativeNames": ["Reef Knot", "Hercules Knot (incorrectly)"],
     "usecases": ["joining", "binding"],
     "characteristics": ["simple", "quick", "flat", "non-critical", "jams"],
     "visual": {
@@ -59,6 +61,7 @@
   {
     "id": "clove-hitch",
     "name": "Clove Hitch",
+    "alternativeNames": [],
     "usecases": ["hitch"],
     "characteristics": ["adjustable", "quick", "temporary", "mid-rope"],
     "visual": {
@@ -87,6 +90,7 @@
   {
     "id": "figure-eight",
     "name": "Figure-Eight Knot / Follow-Through",
+    "alternativeNames": ["Figure 8", "Flemish Bend (for joining)", "Flemish Loop (for loop)"],
     "usecases": ["stopper", "loop"],
     "characteristics": ["secure", "easy-inspect", "reliable", "essential"],
     "visual": {
@@ -116,6 +120,7 @@
   {
     "id": "sheet-bend",
     "name": "Sheet Bend",
+    "alternativeNames": ["Becket Bend", "Weaver's Knot"],
     "usecases": ["joining"],
     "characteristics": ["different-ropes", "relatively-secure", "quick", "simple"],
     "visual": {
@@ -144,6 +149,7 @@
   {
     "id": "taut-line-hitch",
     "name": "Taut-Line Hitch",
+    "alternativeNames": ["Adjustable Hitch", "Midshipman's Hitch (variant)"],
     "usecases": ["hitch", "loop"],
     "characteristics": ["adjustable", "friction"],
     "visual": {
@@ -171,6 +177,7 @@
   {
     "id": "two-half-hitches",
     "name": "Two Half-Hitches",
+    "alternativeNames": [],
     "usecases": ["hitch"],
     "characteristics": ["simple", "quick", "temporary", "non-critical"],
     "visual": {
@@ -199,6 +206,7 @@
   {
     "id": "overhand-knot",
     "name": "Overhand Knot",
+    "alternativeNames": ["Thumb Knot"],
     "usecases": ["stopper"],
     "characteristics": ["simple", "base-knot", "jams"],
     "visual": {
@@ -228,6 +236,7 @@
   {
     "id": "alpine-butterfly",
     "name": "Alpine Butterfly Loop",
+    "alternativeNames": ["Butterfly Knot", "Lineman's Loop"],
     "usecases": ["loop"],
     "characteristics": ["secure", "mid-rope", "easy-untie", "stable"],
     "visual": {
@@ -256,6 +265,7 @@
   {
     "id": "double-fishermans",
     "name": "Double Fisherman's Bend",
+    "alternativeNames": ["Grapevine Bend"],
     "usecases": ["joining"],
     "characteristics": ["secure", "permanent", "reliable", "jams"],
     "visual": {
@@ -284,6 +294,7 @@
   {
     "id": "prusik-knot",
     "name": "Prusik Knot",
+    "alternativeNames": ["Prussik", "Prusik Hitch"],
     "usecases": ["hitch"],
     "characteristics": ["friction", "ascending", "bidirectional", "adjustable"],
     "visual": {
@@ -313,6 +324,7 @@
   {
     "id": "truckers-hitch",
     "name": "Trucker's Hitch",
+    "alternativeNames": ["Lorry Knot", "Haymaker's Hitch"],
     "usecases": ["hitch", "binding"],
     "characteristics": ["mechanical-advantage", "adjustable", "complex"],
     "visual": {
@@ -342,6 +354,7 @@
   {
     "id": "rolling-hitch",
     "name": "Rolling Hitch",
+    "alternativeNames": ["Magnus Hitch", "Magner's Hitch"],
     "usecases": ["hitch"],
     "characteristics": ["secure", "adjustable", "friction", "one-direction"],
     "visual": {

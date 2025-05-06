@@ -2,15 +2,17 @@ document.addEventListener('DOMContentLoaded', async () => {
     // --- Get DOM Elements ---
     const searchInput = document.getElementById('search-input');
     const clearSearchBtn = document.getElementById('clear-search-btn');
+    const sortSelect = document.getElementById('sort-select');
     const filterControls = document.getElementById('filter-controls');
     const characteristicFilterGroup = document.getElementById('characteristic-filter-group');
     const clearAllFiltersBtn = document.getElementById('clear-all-filters-btn');
     const knotGrid = document.getElementById('knot-grid');
     const noResultsMessage = document.getElementById('no-results-message');
     const loadingIndicator = document.getElementById('loading-indicator');
+    const backToTopButton = document.getElementById('back-to-top');
 
     // --- Check if elements exist ---
-    if (!searchInput || !clearSearchBtn || !filterControls || !characteristicFilterGroup || !clearAllFiltersBtn || !knotGrid || !noResultsMessage || !loadingIndicator) {
+    if (!searchInput || !clearSearchBtn || !sortSelect || !filterControls || !characteristicFilterGroup || !clearAllFiltersBtn || !knotGrid || !noResultsMessage || !loadingIndicator || !backToTopButton) {
         console.error("Initialization failed: One or more essential DOM elements not found.");
         if(knotGrid) knotGrid.innerHTML = '<p style="color: red; text-align: center;">Page setup error. Essential elements are missing.</p>';
         return;
@@ -20,7 +22,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     let currentSearchTerm = '';
     let currentUseCaseFilter = 'all';
     let currentCharacteristicFilter = 'all';
+    let currentSortOption = 'relevance';
     let allKnots = [];
+    let initialKnotsOrder = []; // To preserve original order for 'relevance' sort
+
+    // --- LocalStorage Keys ---
+    const LS_SEARCH_TERM = 'knot_searchTerm';
+    const LS_USECASE_FILTER = 'knot_useCaseFilter';
+    const LS_CHAR_FILTER = 'knot_characteristicFilter';
+    const LS_SORT_OPTION = 'knot_sortOption';
 
     // --- Debounce Utility ---
     function debounce(func, wait) {
@@ -35,10 +45,40 @@ document.addEventListener('DOMContentLoaded', async () => {
         };
     }
 
+    // --- Load State from LocalStorage ---
+    function loadState() {
+        currentSearchTerm = localStorage.getItem(LS_SEARCH_TERM) || '';
+        currentUseCaseFilter = localStorage.getItem(LS_USECASE_FILTER) || 'all';
+        currentCharacteristicFilter = localStorage.getItem(LS_CHAR_FILTER) || 'all';
+        currentSortOption = localStorage.getItem(LS_SORT_OPTION) || 'relevance';
+
+        searchInput.value = currentSearchTerm;
+        sortSelect.value = currentSortOption;
+
+        // Set active filter buttons
+        filterControls.querySelectorAll('.filter-group button').forEach(btn => {
+            btn.classList.remove('active');
+            const group = btn.dataset.filterGroup;
+            const filterVal = btn.dataset.filter;
+            if ((group === 'usecase' && filterVal === currentUseCaseFilter) ||
+                (group === 'characteristic' && filterVal === currentCharacteristicFilter)) {
+                btn.classList.add('active');
+            }
+        });
+    }
+
+    // --- Save State to LocalStorage ---
+    function saveState() {
+        localStorage.setItem(LS_SEARCH_TERM, currentSearchTerm);
+        localStorage.setItem(LS_USECASE_FILTER, currentUseCaseFilter);
+        localStorage.setItem(LS_CHAR_FILTER, currentCharacteristicFilter);
+        localStorage.setItem(LS_SORT_OPTION, currentSortOption);
+    }
+
     // --- Fetch Knot Data ---
     async function loadKnotData() {
         loadingIndicator.classList.remove('hidden');
-        knotGrid.classList.add('hidden'); // Hide grid while loading
+        knotGrid.classList.add('hidden');
         noResultsMessage.classList.add('hidden');
 
         try {
@@ -47,17 +87,20 @@ document.addEventListener('DOMContentLoaded', async () => {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
             allKnots = await response.json();
+            initialKnotsOrder = [...allKnots]; // Store original order
             console.log(`Loaded ${allKnots.length} knots.`);
-            populateCharacteristicFilters();
+            populateCharacteristicFilters(); // Populate filters before applying saved state
+            loadState(); // Load state after dynamic filters are populated
         } catch (error) {
             console.error("Could not load knot data:", error);
             knotGrid.innerHTML = '<p style="color: red; text-align: center;">Error loading knot data. Please try again later.</p>';
             searchInput.disabled = true;
+            sortSelect.disabled = true;
             filterControls.querySelectorAll('button').forEach(btn => btn.disabled = true);
             clearAllFiltersBtn.disabled = true;
         } finally {
             loadingIndicator.classList.add('hidden');
-            if (allKnots.length > 0) { // Only unhide grid if data loaded
+            if (allKnots.length > 0) {
                 knotGrid.classList.remove('hidden');
             }
         }
@@ -66,49 +109,41 @@ document.addEventListener('DOMContentLoaded', async () => {
     // --- Populate Characteristic Filters Dynamically ---
     function populateCharacteristicFilters() {
         if (!allKnots.length) return;
-
         const characteristics = new Set();
         allKnots.forEach(knot => {
             (knot.characteristics || []).forEach(char => characteristics.add(char));
         });
-
         const sortedCharacteristics = Array.from(characteristics).sort();
-
-        // Keep the "Any" button, remove others if they exist from a previous load (e.g. hot reload)
-        const existingButtons = characteristicFilterGroup.querySelectorAll('button[data-filter-group="characteristic"]:not([data-filter="all"])');
-        existingButtons.forEach(btn => btn.remove());
-        
         const anyButton = characteristicFilterGroup.querySelector('button[data-filter="all"]');
+        // Clear previously generated buttons except "Any"
+        characteristicFilterGroup.innerHTML = '';
+        characteristicFilterGroup.appendChild(anyButton); // Re-add "Any" button first
 
         sortedCharacteristics.forEach(char => {
             const button = document.createElement('button');
             button.dataset.filterGroup = 'characteristic';
             button.dataset.filter = char;
-            // Capitalize first letter and replace hyphens for display
             button.textContent = char.charAt(0).toUpperCase() + char.slice(1).replace(/-/g, ' ');
-            characteristicFilterGroup.insertBefore(button, null); // Appends to the end of fieldset
+            characteristicFilterGroup.appendChild(button);
         });
     }
-
 
     // --- Render a Single Knot Card ---
     function renderKnotCard(knot) {
         let visualHtml = '';
         if (knot.visual) {
-            const buildVisualItemHtml = (item, isMultiple = false) => {
+            const buildVisualItemHtml = (item) => {
                 let itemHtml = '';
                 let itemStyle = '';
-                if (item.aspectRatio && (item.type === 'iframe' || item.type === 'image' || item.type === 'video')) { // Added image/video
+                if (item.aspectRatio && (item.type === 'iframe' || item.type === 'image' || item.type === 'video')) {
                     itemStyle = `style="aspect-ratio: ${item.aspectRatio};"`;
                 }
-
                 if (item.type === 'iframe') {
                     itemHtml = `<iframe src="${item.src}" title="${item.title || knot.name}" ${itemStyle} frameborder="0" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>`;
                 } else if (item.type === 'image') {
                     itemHtml = `<img src="${item.src}" alt="${item.alt || knot.name}" ${itemStyle} loading="lazy">`;
                 }
-                // Add per-item attribution if it exists
-                if (item.attribution) {
+                if(item.attribution) {
                     let attributionContent = item.attribution;
                     if (item.attributionLink) {
                          attributionContent = `<a href="${item.attributionLink}" target="_blank" rel="noopener noreferrer">${item.attribution}</a>`;
@@ -117,14 +152,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
                 return `<div class="visual-item">${itemHtml}</div>`;
             };
-
             if (knot.visual.type === 'multiple' && Array.isArray(knot.visual.items)) {
-                visualHtml = knot.visual.items.map(item => buildVisualItemHtml(item, true)).join('');
+                visualHtml = knot.visual.items.map(item => buildVisualItemHtml(item)).join('');
             } else {
                 visualHtml = buildVisualItemHtml(knot.visual);
             }
-             // Add overall attribution if present and not handled per-item in 'multiple' or if it's a single visual
-            if (knot.visual.attribution && knot.visual.type !== 'multiple' && !knot.visual.items) { // Ensure it's not already handled
+            if (knot.visual.attribution && knot.visual.type !== 'multiple' && !knot.visual.items) {
                 let attributionContent = knot.visual.attribution;
                  if (knot.visual.attributionLink) {
                     attributionContent = `<a href="${knot.visual.attributionLink}" target="_blank" rel="noopener noreferrer">${knot.visual.attribution}</a>`;
@@ -142,8 +175,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         return `
-            <div class="knot-card" data-id="${knot.id}" data-usecase="${(knot.usecases || []).join(' ')}" data-characteristics="${(knot.characteristics || []).join(' ')}">
-                <h3>${knot.name}</h3>
+            <div class="knot-card" id="knot-${knot.id}" data-id="${knot.id}" data-usecase="${(knot.usecases || []).join(' ')}" data-characteristics="${(knot.characteristics || []).join(' ')}">
+                <div class="knot-card-header">
+                    <h3>${knot.name}</h3>
+                    <button class="permalink-btn" title="Copy link to this knot" data-knot-id="${knot.id}">🔗</button>
+                </div>
                 <div class="knot-visual">
                     ${visualHtml || '<p>No visual available.</p>'}
                 </div>
@@ -159,27 +195,28 @@ document.addEventListener('DOMContentLoaded', async () => {
         `;
     }
 
-    // --- Display Filtered Knots ---
+    // --- Display Filtered and Sorted Knots ---
     function displayKnots(knotsToDisplay) {
-        if (knotsToDisplay.length === 0 && allKnots.length > 0) { // Only show no results if knots are loaded
+        if (knotsToDisplay.length === 0 && allKnots.length > 0) {
             knotGrid.innerHTML = '';
             noResultsMessage.classList.remove('hidden');
         } else if (knotsToDisplay.length > 0) {
             knotGrid.innerHTML = knotsToDisplay.map(renderKnotCard).join('');
             noResultsMessage.classList.add('hidden');
-        } else { // Handles case where allKnots is empty (e.g., initial load before data)
-            knotGrid.innerHTML = ''; // Keep it empty, loading indicator might be visible
+            addPermalinkListeners(); // Add listeners after cards are rendered
+            handleDirectLink(); // Attempt to scroll to a linked knot
+        } else {
+            knotGrid.innerHTML = '';
             noResultsMessage.classList.add('hidden');
         }
     }
 
-    // --- Main Filtering Function ---
-    function filterAndSearchKnots() {
-        if (!allKnots.length) return; // Don't filter if no data
+    // --- Main Filtering and Sorting Function ---
+    function filterSortAndSearchKnots() {
+        if (!allKnots.length) return;
 
         const searchTerm = currentSearchTerm.toLowerCase().trim();
-
-        const filteredKnots = allKnots.filter(knot => {
+        let RfilteredKnots = allKnots.filter(knot => {
             const searchableText = [
                 knot.name,
                 knot.description,
@@ -187,30 +224,91 @@ document.addEventListener('DOMContentLoaded', async () => {
                 ...(knot.pros || []),
                 ...(knot.cons || []),
                 ...(knot.usecases || []),
-                ...(knot.characteristics || [])
+                ...(knot.characteristics || []),
+                ...(knot.alternativeNames || []) // Added alternative names
             ].join(' ').toLowerCase();
             const searchMatch = searchTerm === '' || searchableText.includes(searchTerm);
-
             const useCaseMatch = currentUseCaseFilter === 'all' || (knot.usecases || []).includes(currentUseCaseFilter);
             const characteristicMatch = currentCharacteristicFilter === 'all' || (knot.characteristics || []).includes(currentCharacteristicFilter);
-
             return searchMatch && useCaseMatch && characteristicMatch;
         });
-        displayKnots(filteredKnots);
+
+        // Apply Sorting
+        if (currentSortOption === 'name-asc') {
+            RfilteredKnots.sort((a, b) => a.name.localeCompare(b.name));
+        } else if (currentSortOption === 'name-desc') {
+            RfilteredKnots.sort((a, b) => b.name.localeCompare(a.name));
+        } else if (currentSortOption === 'relevance') {
+            // Sort based on original order in allKnots (which itself comes from initialKnotsOrder)
+            // This requires finding the original index.
+             RfilteredKnots.sort((a, b) => initialKnotsOrder.findIndex(k => k.id === a.id) - initialKnotsOrder.findIndex(k => k.id === b.id));
+        }
+        // Add more sort options here if needed
+
+        displayKnots(RfilteredKnots);
+        saveState();
     }
 
-    const debouncedFilter = debounce(filterAndSearchKnots, 300);
+    const debouncedFilterSort = debounce(filterSortAndSearchKnots, 300);
+
+    // --- Permalink and Direct Linking ---
+    function addPermalinkListeners() {
+        document.querySelectorAll('.permalink-btn').forEach(button => {
+            button.addEventListener('click', async (e) => {
+                e.stopPropagation(); // Prevent card click if any
+                const knotId = button.dataset.knotId;
+                const url = `${window.location.origin}${window.location.pathname}#${knotId}`;
+                try {
+                    await navigator.clipboard.writeText(url);
+                    // Update URL hash without page jump (if supported)
+                    if (history.pushState) {
+                        history.pushState(null, null, `#${knotId}`);
+                    } else {
+                        window.location.hash = knotId; // Fallback
+                    }
+                    // Simple feedback
+                    const originalText = button.textContent;
+                    button.textContent = 'Copied!';
+                    setTimeout(() => { button.textContent = originalText; }, 1500);
+                } catch (err) {
+                    console.error('Failed to copy link: ', err);
+                    alert('Failed to copy link. You can manually copy from the address bar after the page reloads.');
+                    window.location.hash = knotId; // Fallback will cause reload and jump
+                }
+            });
+        });
+    }
+
+    function handleDirectLink() {
+        const hash = window.location.hash.substring(1); // Remove #
+        if (hash) {
+            const targetKnotElement = document.getElementById(`knot-${hash}`);
+            if (targetKnotElement) {
+                targetKnotElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                targetKnotElement.classList.add('highlighted-knot');
+                setTimeout(() => {
+                    targetKnotElement.classList.remove('highlighted-knot');
+                }, 2500); // Remove highlight after a bit
+            }
+        }
+    }
+
 
     // --- Event Listeners ---
     searchInput.addEventListener('input', (event) => {
         currentSearchTerm = event.target.value;
-        debouncedFilter();
+        debouncedFilterSort();
     });
 
     clearSearchBtn.addEventListener('click', () => {
         searchInput.value = '';
         currentSearchTerm = '';
-        filterAndSearchKnots();
+        filterSortAndSearchKnots();
+    });
+
+    sortSelect.addEventListener('change', (event) => {
+        currentSortOption = event.target.value;
+        filterSortAndSearchKnots();
     });
 
     filterControls.addEventListener('click', (event) => {
@@ -231,7 +329,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const groupButtons = button.closest('.filter-group').querySelectorAll('button');
         groupButtons.forEach(btn => btn.classList.remove('active'));
         button.classList.add('active');
-        filterAndSearchKnots();
+        filterSortAndSearchKnots();
     });
 
     clearAllFiltersBtn.addEventListener('click', () => {
@@ -239,6 +337,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         currentSearchTerm = '';
         currentUseCaseFilter = 'all';
         currentCharacteristicFilter = 'all';
+        currentSortOption = 'relevance'; // Reset sort to default
+        sortSelect.value = currentSortOption;
 
         filterControls.querySelectorAll('.filter-group button').forEach(btn => {
             btn.classList.remove('active');
@@ -246,24 +346,31 @@ document.addEventListener('DOMContentLoaded', async () => {
                 btn.classList.add('active');
             }
         });
-        filterAndSearchKnots();
+        filterSortAndSearchKnots(); // This will also save the cleared state
     });
+
+    // Back to Top Button Logic
+    window.addEventListener('scroll', () => {
+        if (window.pageYOffset > 300) { // Show button after scrolling 300px
+            backToTopButton.classList.remove('hidden');
+        } else {
+            backToTopButton.classList.add('hidden');
+        }
+    });
+    backToTopButton.addEventListener('click', () => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
 
     // --- Initial Setup ---
     async function initializeApp() {
-        await loadKnotData();
+        await loadKnotData(); // Loads data, then populates dynamic filters, then loads state
         if (allKnots.length > 0) {
-            displayKnots(allKnots);
-            // Ensure default 'all' buttons are visually active
-            filterControls.querySelector('button[data-filter-group="usecase"][data-filter="all"]').classList.add('active');
-            const characteristicAnyButton = characteristicFilterGroup.querySelector('button[data-filter-group="characteristic"][data-filter="all"]');
-            if (characteristicAnyButton) characteristicAnyButton.classList.add('active');
+            filterSortAndSearchKnots(); // Apply loaded/default state and display
+            // Initial active states for filters are handled by loadState after dynamic filters are populated
         } else if (!loadingIndicator.classList.contains('hidden')) {
-            // If loading failed, loadingIndicator might still be visible,
-            // and noResultsMessage should not be shown for a loading error.
-            // The error message is already in knotGrid.
+            // Loading error already handled in loadKnotData
         } else {
-             // If loading finished but allKnots is empty for other reasons (e.g. empty JSON file)
             noResultsMessage.classList.remove('hidden');
             noResultsMessage.textContent = "No knots available at the moment.";
         }

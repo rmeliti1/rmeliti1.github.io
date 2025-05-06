@@ -14,33 +14,47 @@
     </header>
 
     <div id="controls-area">
-        <!-- Search Controls -->
-        <div id="search-controls">
-            <label for="search-input">Search Knots:</label>
-            <input type="search" id="search-input" placeholder="E.g., Bowline, loop, secure...">
-            <button id="clear-search-btn">Clear Search</button>
+        <div id="search-sort-controls">
+            <!-- Search Controls -->
+            <div id="search-controls">
+                <label for="search-input">Search Knots:</label>
+                <input type="search" id="search-input" placeholder="E.g., Bowline, loop, secure...">
+                <button id="clear-search-btn">Clear Search</button>
+            </div>
+
+            <!-- Sort Controls -->
+            <div id="sort-controls">
+                <label for="sort-select">Sort by:</label>
+                <select id="sort-select">
+                    <option value="relevance">Relevance (Default)</option>
+                    <option value="name-asc">Name (A-Z)</option>
+                    <option value="name-desc">Name (Z-A)</option>
+                </select>
+            </div>
         </div>
 
         <!-- Filter Controls -->
-        <div id="filter-controls">
-            <fieldset class="filter-group">
-                <legend>Filter by Use Case:</legend>
-                <button data-filter-group="usecase" data-filter="all" class="active">Show All</button>
-                <button data-filter-group="usecase" data-filter="joining">Joining Ropes</button>
-                <button data-filter-group="usecase" data-filter="loop">Loops</button>
-                <button data-filter-group="usecase" data-filter="hitch">Hitches</button>
-                <button data-filter-group="usecase" data-filter="stopper">Stopper Knots</button>
-                <button data-filter-group="usecase" data-filter="binding">Binding Knots</button>
-            </fieldset>
+        <div id="filter-controls-wrapper">
+            <div id="filter-controls">
+                <fieldset class="filter-group">
+                    <legend>Filter by Use Case:</legend>
+                    <button data-filter-group="usecase" data-filter="all" class="active">Show All</button>
+                    <button data-filter-group="usecase" data-filter="joining">Joining Ropes</button>
+                    <button data-filter-group="usecase" data-filter="loop">Loops</button>
+                    <button data-filter-group="usecase" data-filter="hitch">Hitches</button>
+                    <button data-filter-group="usecase" data-filter="stopper">Stopper Knots</button>
+                    <button data-filter-group="usecase" data-filter="binding">Binding Knots</button>
+                </fieldset>
 
-            <fieldset class="filter-group" id="characteristic-filter-group">
-                <legend>Filter by Characteristic:</legend>
-                <button data-filter-group="characteristic" data-filter="all" class="active">Any</button>
-                <!-- Characteristic buttons will be dynamically inserted here -->
-            </fieldset>
-        </div>
-        <div id="overall-controls">
-             <button id="clear-all-filters-btn">Reset All Filters</button>
+                <fieldset class="filter-group" id="characteristic-filter-group">
+                    <legend>Filter by Characteristic:</legend>
+                    <button data-filter-group="characteristic" data-filter="all" class="active">Any</button>
+                    <!-- Characteristic buttons will be dynamically inserted here -->
+                </fieldset>
+            </div>
+            <div id="overall-controls">
+                 <button id="clear-all-filters-btn">Reset All Filters & Sort</button>
+            </div>
         </div>
     </div>
 
@@ -50,6 +64,8 @@
     </main>
 
     <p id="no-results-message" class="hidden" aria-live="polite">No knots match your current search and filter criteria.</p>
+
+    <button id="back-to-top" class="hidden" title="Back to Top">↑</button>
 
     <footer>
         <p>Knot information gathered from various sources. Always practice and understand a knot's limitations before relying on it.</p>

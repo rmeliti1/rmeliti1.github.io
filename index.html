@@ -214,16 +214,18 @@
 <script>
     // --- Constants ---
     const ORIGINAL_AAP_URL = 'https://shop.advanceautoparts.com/capi/v42/cart/promotion'; // Original URL
-    const AAP_URL = 'https://corsproxy.io/?' + ORIGINAL_AAP_URL; // Using corsproxy.io
+    // const AAP_URL = 'https://corsproxy.io/?' + ORIGINAL_AAP_URL; // Old proxy
+    const AAP_URL = 'https://thingproxy.freeboard.io/fetch/' + ORIGINAL_AAP_URL; // Using thingproxy.freeboard.io
+
 
     // IMPORTANT: Replace with your actual Bearer Token or implement a secure way to input it.
     // Hardcoding sensitive tokens in client-side code is a security risk.
     let bearerToken = "YOUR_BEARER_TOKEN_HERE"; // Placeholder
     const DEFAULT_SPREADSHEET_ID = "1ke2qsyl6v6XwhkbD-oDFXsflAxUFS7gdmxLNwWZW6ZM"; // Example
     let DEFAULT_MAX_ATTEMPTS_BEFORE_CHANGE = 30000;
-    const REQUEST_TIMEOUT = 10000; // milliseconds
+    const REQUEST_TIMEOUT = 15000; // Increased timeout slightly for proxies
     const NUM_GENERATION_WORKERS = 2; // Number of async "generation tasks"
-    const NUM_CHECKING_WORKERS = 5; // Number of concurrent checks for existing codes
+    const NUM_CHECKING_WORKERS = 3; // Reduced checking workers slightly for public proxies
 
     // Google API Configuration (User must provide these)
     let GOOGLE_API_KEY = '';
@@ -556,7 +558,6 @@
                 prefixes.unshift(selectOpt);
             } else if (!selectOpt && prefixes[0] !== 'Select...' && prefixes.length > 0) {
                 // If 'Select...' was not there and list is not empty, add it.
-                // This case might not be needed if 'Select...' is always added initially.
             }
 
 
@@ -616,28 +617,22 @@
                 bearerToken = newToken;
             } else {
                 bearerToken = `Bearer ${newToken}`;
-                tokenEntry.value = bearerToken; // Update entry if we added "Bearer "
+                tokenEntry.value = bearerToken; 
             }
             localStorage.setItem(LS_BEARER_TOKEN, bearerToken);
-            // logMessage("Bearer token updated from entry.", "INFO"); // Optional: can be noisy
-        } else {
-            // If cleared, perhaps remove from localStorage or set to a default placeholder
-            // For now, just updates the in-memory `bearerToken` if entry is non-empty
         }
     }
 
 
     // --- Core API Logic ---
     async function sendPromoRequest(codeToCheck) {
-        updateBearerTokenFromEntry(); // Ensure latest token is used
+        updateBearerTokenFromEntry(); 
         const headers = {
             "Accept": "*/*",
-            "Accept-Encoding": "gzip, deflate, br", // Proxies might handle this differently, but usually fine
+            "Accept-Encoding": "gzip, deflate, br", 
             "Accept-Language": "en-US,en;q=0.6",
             "Authorization": bearerToken,
             "Content-Type": "application/json",
-            // "Origin": "https://shop.advanceautoparts.com", // DO NOT set Origin when using a CORS proxy, let the browser/proxy handle it
-            // "Referer": "https://shop.advanceautoparts.com/", // Also, generally do not set Referer for proxied requests unless specifically needed and understood
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36",
             "x-auth-method": "cookie-token",
         };
@@ -648,7 +643,7 @@
             const controller = new AbortController();
             const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT);
 
-            const response = await fetch(AAP_URL, { // AAP_URL now points to corsproxy.io
+            const response = await fetch(AAP_URL, { 
                 method: 'POST',
                 headers: headers,
                 body: JSON.stringify(data),
@@ -663,12 +658,9 @@
                 const contentPreview = responseText.substring(0, 200) + (responseText.length > 200 ? '...' : '');
                 logMessage(`Resp (via proxy): ${contentPreview}`, "DEBUG");
             }
-            // Note: When using a proxy, the status code you see is from the proxy itself
-            // if it couldn't reach the target. If it successfully proxies, the status
-            // should be what the target API returned. corsproxy.io tries to mirror target status.
 
             if (response.status === 200) return "VALID";
-            if (response.status === 400) { // This should be the target API's 400 error
+            if (response.status === 400) { 
                 try {
                     const errorData = JSON.parse(responseText);
                     if (errorData.errors && errorData.errors[0]) {
@@ -684,18 +676,17 @@
                         logMessage(`Code ${codeToCheck}: 400 Bad Request from target: ${errorMsg}`, "WARNING");
                         return "ERROR_API";
                     }
-                } catch (e) { /* Ignore JSON parse error if not JSON */ }
+                } catch (e) { /* Ignore JSON parse error */ }
                  if (responseText.toLowerCase().includes('badrequesterror')) return "INVALID";
                 logMessage(`Code ${codeToCheck}: 400 Bad Request (raw from target: ${responseText.substring(0,100)})`, "WARNING");
                 return "ERROR_API";
             }
-            if (response.status === 401 || response.status === 403) return "AUTH_ERROR"; // Target API's auth error
+            if (response.status === 401 || response.status === 403) return "AUTH_ERROR"; 
             
-            // Handle potential proxy-specific errors if corsproxy.io returns them
-            // For example, if corsproxy.io itself has an issue or can't reach the target
-            if (response.status === 503 && responseText.includes("corsproxy.io")) { // Example
-                 logMessage(`corsproxy.io error for ${codeToCheck}: Status ${response.status}. May be rate-limited or target unreachable.`, "ERROR");
-                 return "PROXY_ERROR";
+            // General check for 5xx errors that might indicate a proxy issue or target server error
+            if (response.status >= 500 && response.status <= 599) {
+                 logMessage(`Proxy/Target Server error for ${codeToCheck}: Status ${response.status}.`, "ERROR");
+                 return "PROXY_ERROR"; // Or a more generic server error
             }
 
             logMessage(`Code ${codeToCheck}: Unexpected HTTP Status ${response.status} (possibly from proxy or target)`, "ERROR");
@@ -707,7 +698,6 @@
                 return "TIMEOUT";
             }
             logMessage(`Network error checking code ${codeToCheck} (proxy involved): ${error.message}`, "ERROR");
-            // This could be a failure to connect to corsproxy.io itself
             return "NETWORK_ERROR";
         }
     }
@@ -750,7 +740,7 @@
                     return; 
                 } else if (status === "PROXY_ERROR") {
                      logMessage(`Worker ${workerLogId} encountered PROXY_ERROR for ${generatedCode}. Pausing significantly...`, "ERROR");
-                    await new Promise(resolve => setTimeout(resolve, 30000)); // Longer pause for proxy issues
+                    await new Promise(resolve => setTimeout(resolve, 30000)); 
                 }else { 
                     logMessage(`Worker ${workerLogId} encountered ${status} for ${generatedCode}. Pausing...`, "WARNING");
                     await new Promise(resolve => setTimeout(resolve, 5000)); 
@@ -762,7 +752,7 @@
                     currentPrefix = newPrefix;
                     workerAttemptsSincePrefixChange = 0;
                 }
-                 await new Promise(resolve => setTimeout(resolve, 50)); 
+                 await new Promise(resolve => setTimeout(resolve, 100)); // Slightly increased delay
             }
         } catch (e) {
             logMessage(`Unexpected error in worker ${workerLogId}: ${e.message}`, "ERROR");
@@ -794,7 +784,6 @@
         setRunningState(true, "Generating...");
         stopRequested = false;
         attemptsSinceLastFound = 0;
-        // totalAttempts = 0; 
 
         activeWorkers = NUM_GENERATION_WORKERS;
         for (let i = 0; i < NUM_GENERATION_WORKERS; i++) {
@@ -849,7 +838,7 @@
                     } else if (result.status === "PROXY_ERROR") {
                         logMessage(`Proxy Error checking ${result.code}. Will stop after this batch.`, "ERROR");
                         errorCodes.push(result.code);
-                        stillValidCodes.push(result.code); // Keep code, assume temp proxy issue
+                        stillValidCodes.push(result.code); 
                         proxyErrorEncountered = true;
                     }
                     else { 
@@ -869,7 +858,7 @@
                 logMessage("Proxy error detected during batch, stopping further checks.", "ERROR");
                 break;
             }
-            await new Promise(resolve => setTimeout(resolve, 200)); 
+            await new Promise(resolve => setTimeout(resolve, 300)); // Slightly increased delay for proxy
         }
 
 
@@ -1080,10 +1069,10 @@
             showAlert("Google Config Missing", "Please enter your Google API Key and Client ID in the Configuration section first.");
             return;
         }
-        if (!gapi.client) { 
-            logMessage("Initializing Google Client with new API Key/Client ID...", "INFO");
+        if (!gapi.client || !gapi.client.getToken) { // Check if client is fully initialized for auth
+            logMessage("Initializing Google Client or client not fully ready...", "INFO");
             handleClientLoad(); 
-            showAlert("Google Client Initializing", "Google client is initializing with the new API Key/Client ID. Please try authenticating again in a few seconds.");
+            showAlert("Google Client Initializing", "Google client is initializing. Please try authenticating again in a few seconds.");
             return;
         }
 
@@ -1096,8 +1085,8 @@
                  showAlert("Google Sign-In Error", `Error during sign-in: ${error.error || error.details || JSON.stringify(error)}`);
             });
         } else {
-            logMessage("Google Auth instance not ready. Try again shortly.", "WARNING");
-            handleClientLoad();
+            logMessage("Google Auth instance not ready. Attempting to initialize.", "WARNING");
+            handleClientLoad(); // Try to re-initialize
         }
     }
 

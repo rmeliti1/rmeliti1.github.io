@@ -213,7 +213,9 @@
 
 <script>
     // --- Constants ---
-    const AAP_URL = 'https://shop.advanceautoparts.com/capi/v42/cart/promotion'; // CORS might be an issue
+    const ORIGINAL_AAP_URL = 'https://shop.advanceautoparts.com/capi/v42/cart/promotion'; // Original URL
+    const AAP_URL = 'https://corsproxy.io/?' + ORIGINAL_AAP_URL; // Using corsproxy.io
+
     // IMPORTANT: Replace with your actual Bearer Token or implement a secure way to input it.
     // Hardcoding sensitive tokens in client-side code is a security risk.
     let bearerToken = "YOUR_BEARER_TOKEN_HERE"; // Placeholder
@@ -630,17 +632,14 @@
         updateBearerTokenFromEntry(); // Ensure latest token is used
         const headers = {
             "Accept": "*/*",
-            "Accept-Encoding": "gzip, deflate, br",
+            "Accept-Encoding": "gzip, deflate, br", // Proxies might handle this differently, but usually fine
             "Accept-Language": "en-US,en;q=0.6",
             "Authorization": bearerToken,
             "Content-Type": "application/json",
-            // "Origin": "https://shop.advanceautoparts.com", // Might be needed, or might cause issues depending on CORS
-            // "Referer": "https://shop.advanceautoparts.com/",
-            // "Sec-Fetch-Dest": "empty",
-            // "Sec-Fetch-Mode": "cors", // Browser handles this
-            // "Sec-Fetch-Site": "same-origin", // Browser handles this
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36", // Example, may not be critical
-            "x-auth-method": "cookie-token", // As in original
+            // "Origin": "https://shop.advanceautoparts.com", // DO NOT set Origin when using a CORS proxy, let the browser/proxy handle it
+            // "Referer": "https://shop.advanceautoparts.com/", // Also, generally do not set Referer for proxied requests unless specifically needed and understood
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36",
+            "x-auth-method": "cookie-token",
         };
         const data = { code: codeToCheck };
         const isDebug = debugNetworkCheckbox.checked;
@@ -649,7 +648,7 @@
             const controller = new AbortController();
             const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT);
 
-            const response = await fetch(AAP_URL, {
+            const response = await fetch(AAP_URL, { // AAP_URL now points to corsproxy.io
                 method: 'POST',
                 headers: headers,
                 body: JSON.stringify(data),
@@ -657,16 +656,19 @@
             });
             clearTimeout(timeoutId);
 
-            const responseText = await response.text(); // Get text first for debugging
+            const responseText = await response.text(); 
 
             if (isDebug) {
-                logMessage(`Req ${codeToCheck}: Status ${response.status}`, "DEBUG");
+                logMessage(`Req ${codeToCheck} (via proxy): Status ${response.status}`, "DEBUG");
                 const contentPreview = responseText.substring(0, 200) + (responseText.length > 200 ? '...' : '');
-                logMessage(`Resp: ${contentPreview}`, "DEBUG");
+                logMessage(`Resp (via proxy): ${contentPreview}`, "DEBUG");
             }
+            // Note: When using a proxy, the status code you see is from the proxy itself
+            // if it couldn't reach the target. If it successfully proxies, the status
+            // should be what the target API returned. corsproxy.io tries to mirror target status.
 
             if (response.status === 200) return "VALID";
-            if (response.status === 400) {
+            if (response.status === 400) { // This should be the target API's 400 error
                 try {
                     const errorData = JSON.parse(responseText);
                     if (errorData.errors && errorData.errors[0]) {
@@ -674,22 +676,29 @@
                         const errorName = errorData.errors[0].name || "";
                         if (errorName === "DuplicatePromoCodeError") {
                              logMessage(`Code ${codeToCheck}: Duplicate error (likely concurrency). Keeping code.`, "WARNING");
-                             return "DUPLICATE"; // Treat as potentially valid if API has race conditions
+                             return "DUPLICATE";
                         }
                         if (errorMsg.includes("promotion code is not valid") || errorMsg.includes("expired")) {
                             return "INVALID";
                         }
-                        logMessage(`Code ${codeToCheck}: 400 Bad Request: ${errorMsg}`, "WARNING");
-                        return "ERROR_API"; // Specific API error
+                        logMessage(`Code ${codeToCheck}: 400 Bad Request from target: ${errorMsg}`, "WARNING");
+                        return "ERROR_API";
                     }
                 } catch (e) { /* Ignore JSON parse error if not JSON */ }
-                 if (responseText.toLowerCase().includes('badrequesterror')) return "INVALID"; // Heuristic
-                logMessage(`Code ${codeToCheck}: 400 Bad Request (raw: ${responseText.substring(0,100)})`, "WARNING");
+                 if (responseText.toLowerCase().includes('badrequesterror')) return "INVALID";
+                logMessage(`Code ${codeToCheck}: 400 Bad Request (raw from target: ${responseText.substring(0,100)})`, "WARNING");
                 return "ERROR_API";
             }
-            if (response.status === 401 || response.status === 403) return "AUTH_ERROR";
+            if (response.status === 401 || response.status === 403) return "AUTH_ERROR"; // Target API's auth error
             
-            logMessage(`Code ${codeToCheck}: Unexpected HTTP Status ${response.status}`, "ERROR");
+            // Handle potential proxy-specific errors if corsproxy.io returns them
+            // For example, if corsproxy.io itself has an issue or can't reach the target
+            if (response.status === 503 && responseText.includes("corsproxy.io")) { // Example
+                 logMessage(`corsproxy.io error for ${codeToCheck}: Status ${response.status}. May be rate-limited or target unreachable.`, "ERROR");
+                 return "PROXY_ERROR";
+            }
+
+            logMessage(`Code ${codeToCheck}: Unexpected HTTP Status ${response.status} (possibly from proxy or target)`, "ERROR");
             return "ERROR_HTTP";
 
         } catch (error) {
@@ -697,7 +706,8 @@
                 logMessage(`Request timed out for code ${codeToCheck}.`, "WARNING");
                 return "TIMEOUT";
             }
-            logMessage(`Network error checking code ${codeToCheck}: ${error.message}`, "ERROR");
+            logMessage(`Network error checking code ${codeToCheck} (proxy involved): ${error.message}`, "ERROR");
+            // This could be a failure to connect to corsproxy.io itself
             return "NETWORK_ERROR";
         }
     }
@@ -720,10 +730,10 @@
                 totalAttempts++;
                 attemptsSinceLastFound++;
                 workerAttemptsSincePrefixChange++;
-                attemptsSincePrefixChange = workerAttemptsSincePrefixChange; // Update global for display
+                attemptsSincePrefixChange = workerAttemptsSincePrefixChange; 
                 updateAttemptsDisplay();
 
-                if (status === "VALID" || status === "DUPLICATE") { // Treat duplicate as found for now
+                if (status === "VALID" || status === "DUPLICATE") { 
                     logMessage(`Worker ${workerLogId} found: ${generatedCode} (Status: ${status})`, "SUCCESS");
                     let currentValidCodes = loadValidCodes();
                     if (!currentValidCodes.includes(generatedCode)) {
@@ -732,16 +742,18 @@
                     }
                     attemptsSinceLastFound = 0;
                     workerAttemptsSincePrefixChange = 0;
-                    // Optionally, this worker could stop or switch prefix: break;
                 } else if (status === "INVALID") {
                     // Continue
                 } else if (status === "AUTH_ERROR") {
                     logMessage(`Worker ${workerLogId}: Auth Error (401/403) checking ${generatedCode}. Stopping all tasks.`, "ERROR");
-                    stopAllTasks(true); // Signal a hard stop due to auth error
-                    return; // Stop this worker
-                } else { // Network error, timeout, API error etc.
+                    stopAllTasks(true); 
+                    return; 
+                } else if (status === "PROXY_ERROR") {
+                     logMessage(`Worker ${workerLogId} encountered PROXY_ERROR for ${generatedCode}. Pausing significantly...`, "ERROR");
+                    await new Promise(resolve => setTimeout(resolve, 30000)); // Longer pause for proxy issues
+                }else { 
                     logMessage(`Worker ${workerLogId} encountered ${status} for ${generatedCode}. Pausing...`, "WARNING");
-                    await new Promise(resolve => setTimeout(resolve, 5000)); // Pause
+                    await new Promise(resolve => setTimeout(resolve, 5000)); 
                 }
 
                 if (workerAttemptsSincePrefixChange >= DEFAULT_MAX_ATTEMPTS_BEFORE_CHANGE) {
@@ -750,7 +762,7 @@
                     currentPrefix = newPrefix;
                     workerAttemptsSincePrefixChange = 0;
                 }
-                 await new Promise(resolve => setTimeout(resolve, 50)); // Small delay between attempts
+                 await new Promise(resolve => setTimeout(resolve, 50)); 
             }
         } catch (e) {
             logMessage(`Unexpected error in worker ${workerLogId}: ${e.message}`, "ERROR");
@@ -782,11 +794,10 @@
         setRunningState(true, "Generating...");
         stopRequested = false;
         attemptsSinceLastFound = 0;
-        // totalAttempts = 0; // Optionally reset total attempts for each run
+        // totalAttempts = 0; 
 
         activeWorkers = NUM_GENERATION_WORKERS;
         for (let i = 0; i < NUM_GENERATION_WORKERS; i++) {
-            // Start worker, don't await it here, let it run in background
             generationWorker(selectedPrefix, `Gen-${i + 1}`);
         }
         logMessage(`Submitted ${NUM_GENERATION_WORKERS} generation worker(s) for ${selectedPrefix}.`, "INFO");
@@ -804,13 +815,13 @@
 
         let stillValidCodes = [];
         let invalidCodesFound = [];
-        let errorCodes = []; // Codes that had network/API issues, or auth errors
+        let errorCodes = []; 
         let authErrorEncountered = false;
+        let proxyErrorEncountered = false;
 
         let processedCount = 0;
         const totalToProcess = codesToCheck.length;
         
-        // Process codes in batches to manage concurrency
         const batchSize = NUM_CHECKING_WORKERS;
         for (let i = 0; i < totalToProcess; i += batchSize) {
             if (stopRequested) break;
@@ -832,13 +843,19 @@
                         invalidCodesFound.push(result.code);
                     } else if (result.status === "AUTH_ERROR") {
                         logMessage(`Auth Error (401/403) checking ${result.code}. Will stop after this batch.`, "ERROR");
-                        errorCodes.push(result.code); // Keep it for now
-                        stillValidCodes.push(result.code); // Assume it might be temp, keep it
-                        authErrorEncountered = true; // Signal to stop further processing
-                    } else { // Network, timeout, API error
+                        errorCodes.push(result.code); 
+                        stillValidCodes.push(result.code); 
+                        authErrorEncountered = true; 
+                    } else if (result.status === "PROXY_ERROR") {
+                        logMessage(`Proxy Error checking ${result.code}. Will stop after this batch.`, "ERROR");
+                        errorCodes.push(result.code);
+                        stillValidCodes.push(result.code); // Keep code, assume temp proxy issue
+                        proxyErrorEncountered = true;
+                    }
+                    else { 
                         logMessage(`Error checking ${result.code} (Status: ${result.status}). Kept in list.`, "ERROR");
                         errorCodes.push(result.code);
-                        stillValidCodes.push(result.code); // Keep codes with temporary errors
+                        stillValidCodes.push(result.code); 
                     }
                 }
             } catch (batchError) {
@@ -846,15 +863,19 @@
             }
              if (authErrorEncountered) {
                 logMessage("Auth error detected, stopping further checks.", "ERROR");
-                break; // Stop processing more batches
+                break; 
             }
-            await new Promise(resolve => setTimeout(resolve, 200)); // Small delay between batches
+            if (proxyErrorEncountered) {
+                logMessage("Proxy error detected during batch, stopping further checks.", "ERROR");
+                break;
+            }
+            await new Promise(resolve => setTimeout(resolve, 200)); 
         }
 
 
-        if (!stopRequested && !authErrorEncountered) {
+        if (!stopRequested && !authErrorEncountered && !proxyErrorEncountered) {
             logMessage(`${workerLogId}: Check run finished naturally.`, "DEBUG");
-            saveValidCodes(stillValidCodes); // This also sorts and removes duplicates
+            saveValidCodes(stillValidCodes); 
             logMessage(`Check complete. Removed ${invalidCodesFound.length} invalid codes. ${stillValidCodes.length} remain.`, "SUCCESS");
             
             if (GOOGLE_API_KEY && GOOGLE_CLIENT_ID && updateGoogleSheetsCheckbox.checked && googleAuthInstance && googleAuthInstance.isSignedIn.get()) {
@@ -864,14 +885,15 @@
             }
 
         } else if (authErrorEncountered) {
-            logMessage(`Check stopped due to authorization error. File not updated with removals, but errors logged.`, "ERROR");
-            // Decide if we save `stillValidCodes` which might include codes that failed auth.
-            // For now, we don't update the main list on auth error to prevent data loss.
-        } else { // Manually stopped
+            logMessage(`Check stopped due to authorization error. File not updated with removals.`, "ERROR");
+        } else if (proxyErrorEncountered) {
+            logMessage(`Check stopped due to proxy error. File not updated with removals.`, "ERROR");
+        }
+        else { 
             logMessage(`Check stopped manually after processing ${processedCount} codes. File not updated.`, "INFO");
         }
         
-        activeWorkers--; // This is the checkCoordinator worker
+        activeWorkers--; 
         checkAllWorkersFinished();
     }
 
@@ -896,13 +918,13 @@
         setRunningState(true, `Checking ${codesToCheck.length} codes...`);
         stopRequested = false;
         
-        activeWorkers = 1; // The runCheckLoop itself is the "worker"
-        runCheckLoop(codesToCheck); // Don't await, let it run
+        activeWorkers = 1; 
+        runCheckLoop(codesToCheck); 
     }
 
 
     // --- Task Management ---
-    function stopAllTasks(forceStop = false) { // forceStop for critical errors like auth
+    function stopAllTasks(forceStop = false) { 
         if (!isRunning && !forceStop) return;
 
         if (!stopRequested) {
@@ -910,28 +932,22 @@
             stopRequested = true;
         }
         
-        // UI updates to reflect stopping state
         stopButton.disabled = true;
         generateButton.disabled = true;
         checkCodesButton.disabled = true;
         appTitle.textContent = "Promo Code Generator - Stopping...";
 
         if (forceStop) {
-            // If it's a forced stop (e.g. auth error), we might want to immediately reset state
-            // This is a bit aggressive as workers might still be in flight.
-            // The current worker logic should detect `stopRequested` and exit.
             logMessage("Forcing stop due to critical error.", "ERROR");
-            // Consider if any immediate cleanup is needed beyond what checkAllWorkersFinished does
         }
-        // checkAllWorkersFinished will handle the final reset once activeWorkers is 0
     }
 
     function checkAllWorkersFinished() {
-        if (activeWorkers <= 0 && isRunning) { // isRunning check to prevent multiple calls
+        if (activeWorkers <= 0 && isRunning) { 
             logMessage("All workers finished.", "INFO");
             const finalStatus = stopRequested ? "Stopped" : "Completed";
-            setRunningState(false, finalStatus); // Reset UI and state
-            stopRequested = false; // Clear flag for next run
+            setRunningState(false, finalStatus); 
+            stopRequested = false; 
         }
     }
 
@@ -946,10 +962,8 @@
             generateButton.disabled = false;
             checkCodesButton.disabled = false;
             stopButton.disabled = true;
-            activeWorkers = 0; // Ensure counter is reset
+            activeWorkers = 0; 
             resetCodeDisplay();
-            // updateAttemptsDisplay(); // Or reset it:
-            // attemptsLabel.textContent = "Attempts: 0 | Total: 0 | Since Change: 0";
         }
     }
 
@@ -979,11 +993,11 @@
             const clipboardText = await navigator.clipboard.readText();
             if (clipboardText) {
                 tokenEntry.value = clipboardText.trim();
-                updateBearerTokenFromEntry(); // This updates global `bearerToken`
+                updateBearerTokenFromEntry(); 
 
-                logMessage("Pasted token. Testing validity...", "INFO");
+                logMessage("Pasted token. Testing validity (via proxy)...", "INFO");
                 
-                let testCode = "CPNTEST0000PXXXXX"; // A generic, likely invalid code for testing auth
+                let testCode = "CPNTEST0000PXXXXX"; 
                 const currentPrefixes = loadPrefixes();
                  if (currentPrefixes.length > 1 && currentPrefixes[0] !== 'Select...') {
                     const actualPrefix = currentPrefixes.find(p => p !== 'Select...');
@@ -1009,15 +1023,18 @@
     
     function handleTokenTestResult(status, testCode) {
         if (status === "AUTH_ERROR") {
-            logMessage("Token Test Failed: Authorization Error (401/403). Token is invalid/expired.", "ERROR");
-            showAlert("Token Test Failed", "Authentication failed (401/403). Please provide a valid Bearer token.");
+            logMessage("Token Test Failed: Authorization Error (401/403) from target API.", "ERROR");
+            showAlert("Token Test Failed", "Authentication failed (401/403 via proxy). Please provide a valid Bearer token.");
         } else if (status === "VALID" || status === "INVALID" || status === "DUPLICATE" || status === "ERROR_API") {
-            // ERROR_API means the API responded with a 400, but not an auth error, so token is likely okay.
-            logMessage("Token Test Successful: Authentication passed (server responded).", "SUCCESS");
-            showAlert("Token Test Successful", "Authentication passed. The server responded (the test code's validity itself doesn't matter for this auth test).");
-        } else { // NETWORK_ERROR, TIMEOUT, ERROR_HTTP
-            logMessage(`Token Test Inconclusive: Error (${status}). Check network/API.`, "WARNING");
-            showAlert("Token Test Inconclusive", `Could not confirm token validity due to an error: ${status}. Check your network connection and the API status.`);
+            logMessage("Token Test Successful: Authentication passed (server responded via proxy).", "SUCCESS");
+            showAlert("Token Test Successful", "Authentication passed (via proxy). The server responded (the test code's validity itself doesn't matter for this auth test).");
+        } else if (status === "PROXY_ERROR") {
+             logMessage("Token Test Inconclusive: Proxy Error. Check proxy status.", "ERROR");
+            showAlert("Token Test Inconclusive", "Could not confirm token validity due to a proxy error. The proxy service might be down or blocking the request.");
+        }
+        else { 
+            logMessage(`Token Test Inconclusive: Error (${status}) via proxy. Check network/API.`, "WARNING");
+            showAlert("Token Test Inconclusive", `Could not confirm token validity due to an error: ${status} (via proxy). Check your network connection and the API status.`);
         }
     }
 
@@ -1063,10 +1080,9 @@
             showAlert("Google Config Missing", "Please enter your Google API Key and Client ID in the Configuration section first.");
             return;
         }
-        if (!gapi.client) { // If gapi.client is not loaded yet (e.g. API key was just entered)
+        if (!gapi.client) { 
             logMessage("Initializing Google Client with new API Key/Client ID...", "INFO");
-            handleClientLoad(); // This will call initGoogleClient
-            // User might need to click again after initialization
+            handleClientLoad(); 
             showAlert("Google Client Initializing", "Google client is initializing with the new API Key/Client ID. Please try authenticating again in a few seconds.");
             return;
         }
@@ -1081,7 +1097,6 @@
             });
         } else {
             logMessage("Google Auth instance not ready. Try again shortly.", "WARNING");
-            // Attempt to re-initialize if it failed earlier
             handleClientLoad();
         }
     }
@@ -1099,20 +1114,18 @@
 
         logMessage("Starting Google Sheets update...", "INFO");
         try {
-            // 1. Clear the sheet (e.g., column A)
-            const clearRange = 'Sheet1!A:A'; // Assuming codes are in column A
+            const clearRange = 'Sheet1!A:A'; 
             await gapi.client.sheets.spreadsheets.values.clear({
                 spreadsheetId: spreadsheetId,
                 range: clearRange,
             });
             logMessage(`Cleared Google Sheet range ${clearRange}.`, "INFO");
 
-            // 2. Write new codes
-            const values = codesToWrite.map(code => [code]); // Each code in its own row, first column
+            const values = codesToWrite.map(code => [code]); 
             const body = { values: values };
             const result = await gapi.client.sheets.spreadsheets.values.update({
                 spreadsheetId: spreadsheetId,
-                range: 'Sheet1!A1', // Start writing from A1
+                range: 'Sheet1!A1', 
                 valueInputOption: 'RAW',
                 resource: body,
             });
@@ -1128,9 +1141,8 @@
 
     // --- Initialization ---
     function initializeApp() {
-        // Load saved settings
         tokenEntry.value = localStorage.getItem(LS_BEARER_TOKEN) || "YOUR_BEARER_TOKEN_HERE";
-        updateBearerTokenFromEntry(); // To set the global var
+        updateBearerTokenFromEntry(); 
 
         spreadsheetIdEntry.value = localStorage.getItem(LS_SPREADSHEET_ID) || DEFAULT_SPREADSHEET_ID;
         googleApiKeyEntry.value = localStorage.getItem(LS_GOOGLE_API_KEY) || "";
@@ -1147,23 +1159,21 @@
 
         updatePrefixDropdown();
         updateAttemptsDisplay();
-        setRunningState(false); // Initial state
+        setRunningState(false); 
 
-        // Event Listeners
         discountValueRadios.forEach(radio => radio.addEventListener('change', updatePrefixDropdown));
         addPrefixButton.addEventListener('click', addPrefixHandler);
         removePrefixButton.addEventListener('click', removePrefixHandler);
         updateMaxAttemptsButton.addEventListener('click', updateMaxAttemptsHandler);
-        tokenEntry.addEventListener('focusout', updateBearerTokenFromEntry); // Update on blur
-        tokenEntry.addEventListener('change', updateBearerTokenFromEntry); // Update on enter/change
+        tokenEntry.addEventListener('focusout', updateBearerTokenFromEntry); 
+        tokenEntry.addEventListener('change', updateBearerTokenFromEntry); 
 
         spreadsheetIdEntry.addEventListener('change', () => localStorage.setItem(LS_SPREADSHEET_ID, spreadsheetIdEntry.value));
         googleApiKeyEntry.addEventListener('change', () => {
             GOOGLE_API_KEY = googleApiKeyEntry.value;
             localStorage.setItem(LS_GOOGLE_API_KEY, GOOGLE_API_KEY);
-             if (gapi && gapi.client) { // If API key changes, re-init might be needed
+             if (gapi && gapi.client) { 
                 logMessage("Google API Key changed. Re-initialization of Google Client might be needed if issues occur.", "WARNING");
-                // For simplicity, not forcing re-init here, but user might need to re-auth or refresh.
             }
         });
         googleClientIdEntry.addEventListener('change', () => {
@@ -1183,8 +1193,6 @@
         pasteTestTokenButton.addEventListener('click', pasteAndTestToken);
         googleAuthButton.addEventListener('click', handleGoogleAuthClick);
 
-        // Load Google API client library
-        // Defer loading until API key and Client ID are potentially available from localStorage
         if (GOOGLE_API_KEY && GOOGLE_CLIENT_ID) {
             handleClientLoad();
         } else {
@@ -1195,7 +1203,6 @@
         logMessage("Application initialized. Ready.", "INFO");
     }
 
-    // Start the app
     document.addEventListener('DOMContentLoaded', initializeApp);
 
 </script>
